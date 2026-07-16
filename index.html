@@ -3,137 +3,142 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#eaf2fb">
+  <meta name="theme-color" content="#080909">
   <title>像素100&奇点同行 · 优秀作业展</title>
   <style>
     :root {
-      color-scheme: light;
-      --paper: #eaf2fb;
-      --ink: #142650;
-      --muted: #66769a;
+      color-scheme: dark;
+      --black: #080909;
+      --white: #f4f7f8;
+      --muted: rgba(244, 247, 248, .56);
       --blue: #3159d9;
-      --header-h: 68px;
-      --gutter: clamp(8px, 0.75vw, 14px);
-      --page-pad: clamp(12px, 1.35vw, 24px);
-      --card-radius: 22px;
+      --cyan: #63d8e8;
+      --radius: clamp(16px, 1.5vw, 24px);
+      --ease: cubic-bezier(.16, 1, .3, 1);
+      --duration: 680ms;
+      --autoplay: 5600ms;
     }
 
     * { box-sizing: border-box; }
 
-    html {
-      background: var(--paper);
-      scroll-behavior: smooth;
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--black);
     }
 
     body {
-      margin: 0;
-      color: var(--ink);
-      background: var(--paper);
-      background-image:
-        radial-gradient(circle at 82% 8%, rgba(255, 217, 117, .28), transparent 22%),
-        radial-gradient(circle at 12% 36%, rgba(149, 211, 255, .30), transparent 28%),
-        linear-gradient(145deg, #edf6ff 0%, #dcecff 52%, #e9f4ff 100%);
-      background-attachment: fixed;
-      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "SimSun", sans-serif;
+      color: var(--white);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       -webkit-font-smoothing: antialiased;
     }
 
-    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; }
 
     .site-header {
-      height: var(--header-h);
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 20;
+      height: clamp(66px, 8.5vh, 88px);
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding-inline: var(--page-pad);
-      background: rgba(234, 242, 251, .92);
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      backdrop-filter: blur(18px);
+      padding-inline: clamp(18px, 3vw, 48px);
+      pointer-events: none;
     }
 
     .brand {
       display: inline-flex;
       align-items: center;
       gap: 11px;
-      color: var(--ink);
-      text-decoration: none;
-      font-size: 20px;
+      color: var(--white);
+      font-size: clamp(15px, 1.2vw, 19px);
       font-weight: 500;
       line-height: 1.4;
+      text-decoration: none;
+      pointer-events: auto;
     }
 
     .brand-logo {
-      width: 32px;
+      width: clamp(25px, 2.2vw, 32px);
       height: auto;
       display: block;
     }
 
     .brand-suffix {
-      margin-left: 1px;
       color: var(--muted);
       font-weight: 400;
     }
 
-    .top-nav {
-      display: flex;
-      align-items: center;
-      gap: clamp(22px, 3.4vw, 54px);
-      font-size: 14px;
-    }
-
-    .top-nav a {
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 180ms ease;
-    }
-
-    .top-nav a:hover,
-    .top-nav a[aria-current="page"] { color: var(--blue); }
-
-    main {
-      padding: var(--gutter) var(--page-pad) clamp(96px, 10vh, 128px);
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      /* 每个基础格固定为 4:3，行高由脚本根据实际列宽精确计算 */
-      grid-auto-rows: var(--grid-row, 180px);
-      grid-auto-flow: dense;
-      gap: var(--gutter);
-      min-height: calc(100vh - var(--header-h) - var(--gutter));
-    }
-
-    .work {
-      --delay: 0ms;
+    .carousel {
       position: relative;
-      margin: 0;
-      min-width: 0;
+      width: 100vw;
+      height: 100svh;
+      min-height: 520px;
       overflow: hidden;
-      border-radius: var(--card-radius);
-      background: #dcecff;
-      isolation: isolate;
-      opacity: 0;
-      transform: translateY(18px);
-      animation: enter 680ms cubic-bezier(.16, 1, .3, 1) forwards;
-      animation-delay: var(--delay);
+      touch-action: pan-y;
+      user-select: none;
+      background:
+        radial-gradient(circle at 50% 44%, rgba(49, 89, 217, .08), transparent 42%),
+        var(--black);
     }
 
-    .work.featured { grid-column: span 2; grid-row: span 2; }
+    .slides {
+      position: absolute;
+      inset: 0;
+    }
 
-    .work.is-filtered-out { display: none; }
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      margin: 0;
+      padding: clamp(76px, 10vh, 108px) clamp(18px, 6vw, 96px) clamp(78px, 9vh, 104px);
+      opacity: 0;
+      visibility: hidden;
+      transform: translate3d(10%, 0, 0) scale(.985);
+      transition:
+        transform var(--duration) var(--ease),
+        opacity 420ms ease,
+        visibility 0s linear var(--duration);
+      will-change: transform, opacity;
+      pointer-events: none;
+    }
 
-    .work img {
+    .slide[data-state="before"] {
+      transform: translate3d(-10%, 0, 0) scale(.985);
+    }
+
+    .slide[data-state="active"] {
+      z-index: 2;
+      opacity: 1;
+      visibility: visible;
+      transform: translate3d(0, 0, 0) scale(1);
+      transition-delay: 0s;
+      pointer-events: auto;
+    }
+
+    .artwork {
+      position: relative;
+      width: min(84vw, 1120px, calc((100svh - 188px) * 4 / 3));
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: #101314;
+      box-shadow: 0 28px 90px rgba(0, 0, 0, .48);
+      contain: paint;
+    }
+
+    .artwork img {
       width: 100%;
       height: 100%;
       display: block;
       object-fit: cover;
       object-position: center;
-      aspect-ratio: auto;
-      transform: scale(1.015);
-      transition: transform 700ms cubic-bezier(.16, 1, .3, 1), filter 400ms ease;
+      transform: scale(1.01);
     }
 
     .caption {
@@ -142,232 +147,237 @@
       z-index: 2;
       display: flex;
       align-items: flex-end;
-      justify-content: space-between;
-      min-height: 25%;
-      padding: clamp(13px, 1.2vw, 20px);
+      min-height: 24%;
+      padding: clamp(17px, 2vw, 28px);
       color: #fff;
-      background: linear-gradient(to top, rgba(20, 38, 80, .78), rgba(20, 38, 80, .16) 58%, transparent);
-      transition: min-height 500ms cubic-bezier(.16, 1, .3, 1);
+      background: linear-gradient(to top, rgba(5, 8, 10, .78), rgba(5, 8, 10, .15) 62%, transparent);
     }
 
     .student {
-      font-size: clamp(13px, 1vw, 16px);
+      font-size: clamp(14px, 1.15vw, 18px);
       font-weight: 500;
-      letter-spacing: .02em;
-      text-shadow: 0 1px 12px rgba(20, 38, 80, .42);
+      letter-spacing: .04em;
+      text-shadow: 0 2px 18px rgba(0, 0, 0, .62);
     }
 
-    .work:hover img { transform: scale(1.06); filter: saturate(1.04); }
-    .work:hover .caption { min-height: 31%; }
-
-    .filter-dock {
+    .carousel-guide {
       position: fixed;
       left: 50%;
-      bottom: clamp(14px, 2.2vh, 28px);
-      z-index: 40;
-      max-width: calc(100vw - 24px);
+      bottom: clamp(26px, 4vh, 42px);
+      z-index: 20;
+      width: min(76vw, 520px);
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: clamp(5px, .65vw, 9px);
       transform: translateX(-50%);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .94);
-      box-shadow: 0 16px 34px rgba(49, 89, 150, .14);
-      backdrop-filter: blur(24px) saturate(1.25);
     }
 
-    .filter-dock::-webkit-scrollbar { display: none; }
-
-    .filter {
-      flex: 0 0 auto;
+    .guide-item {
+      position: relative;
+      height: 18px;
+      padding: 0;
       border: 0;
-      border-radius: 999px;
-      padding: 10px 21px;
-      color: var(--ink);
       background: transparent;
-      font: inherit;
-      font-size: 14px;
-      white-space: nowrap;
       cursor: pointer;
-      transition: color 180ms ease, background 180ms ease, transform 180ms ease;
     }
 
-    .filter:hover { background: #f3f8ff; }
-    .filter:active { transform: scale(.97); }
-    .filter[aria-pressed="true"] {
-      color: #fff;
-      background: var(--blue);
-      font-weight: 700;
-    }
-    .filter:focus-visible { outline: 3px solid color-mix(in oklch, var(--blue) 32%, transparent); outline-offset: 2px; }
-
-    @keyframes enter {
-      to { opacity: 1; transform: translateY(0); }
+    .guide-item::before,
+    .guide-item::after {
+      content: "";
+      position: absolute;
+      inset: 8px 0 auto;
+      height: 2px;
+      border-radius: 99px;
     }
 
-    @media (max-width: 980px) {
-      .gallery {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
+    .guide-item::before { background: rgba(255, 255, 255, .2); }
+
+    .guide-item::after {
+      background: var(--cyan);
+      transform: scaleX(0);
+      transform-origin: left center;
+    }
+
+    .guide-item[aria-current="true"]::before { background: rgba(255, 255, 255, .34); }
+
+    .guide-item[aria-current="true"]::after {
+      animation: progress var(--autoplay) linear forwards;
+    }
+
+    .guide-item:focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @keyframes progress {
+      to { transform: scaleX(1); }
     }
 
     @media (max-width: 680px) {
-      :root { --header-h: 60px; --page-pad: 8px; --gutter: 7px; }
-      .brand { font-size: 16px; }
-      .brand-logo { width: 27px; }
-      .top-nav { display: none; }
-      main { padding-bottom: 90px; }
-      .gallery {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .site-header { height: 64px; }
+      .brand { gap: 8px; }
+      .brand-suffix { display: none; }
+      .slide { padding: 72px 12px 82px; }
+      .artwork {
+        width: min(calc(100vw - 24px), calc((100svh - 170px) * 4 / 3));
+        border-radius: 16px;
       }
-      .work.featured { grid-column: span 2; grid-row: span 2; }
-      .caption { min-height: 28%; }
-      .filter-dock {
-        left: 8px;
-        right: 8px;
-        transform: none;
-        max-width: none;
-      }
-      .filter { padding: 9px 16px; }
+      .carousel-guide { width: calc(100vw - 36px); gap: 4px; bottom: 25px; }
+      .caption { padding: 16px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 1ms !important; transition-duration: 1ms !important; }
+      .slide {
+        transition-duration: 1ms !important;
+        transform: none !important;
+      }
+      .guide-item[aria-current="true"]::after {
+        animation: none;
+        transform: scaleX(1);
+      }
     }
   </style>
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="#gallery" aria-label="像素100与奇点同行优秀作业展首页">
+    <a class="brand" href="#slide-1" aria-label="像素100与奇点同行优秀作业展">
       <img class="brand-logo" src="data:image/png;base64,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" alt="像素100&奇点同行 logo">
       <span>像素100&amp;奇点同行</span>
       <span class="brand-suffix">· 优秀作业展</span>
     </a>
-    <nav class="top-nav" aria-label="主导航">
-      <a href="#gallery" aria-current="page">首页</a>
-      <a href="#gallery">发现</a>
-      <a href="#about">关于</a>
-    </nav>
   </header>
 
-  <main id="gallery">
-    <section class="gallery" aria-label="优秀学生作业">
-      <figure class="work featured" data-category="视觉设计" style="--delay: 0ms">
-        <img src="assets/work-placeholder.svg" alt="李明远的作品图片待上传" fetchpriority="high">
-        <figcaption class="caption"><span class="student">李明远</span></figcaption>
+  <main class="carousel" aria-label="优秀学生作业轮播" tabindex="0">
+    <div class="slides">
+      <figure class="slide" id="slide-1" data-state="active">
+        <div class="artwork"><img src="assets/work-placeholder.svg" alt="李明远的作品图片待上传" fetchpriority="high"><figcaption class="caption"><span class="student">李明远</span></figcaption></div>
       </figure>
-      <figure class="work" data-category="产品设计" style="--delay: 50ms">
-        <img src="assets/work-placeholder.svg" alt="张雨桐的作品图片待上传">
-        <figcaption class="caption"><span class="student">张雨桐</span></figcaption>
+      <figure class="slide" id="slide-2" data-state="after">
+        <div class="artwork"><img src="assets/work-placeholder.svg" alt="张雨桐的作品图片待上传"><figcaption class="caption"><span class="student">张雨桐</span></figcaption></div>
       </figure>
-      <figure class="work" data-category="视觉设计" style="--delay: 100ms">
-        <img src="assets/work-placeholder.svg" alt="陈思羽的作品图片待上传">
-        <figcaption class="caption"><span class="student">陈思羽</span></figcaption>
+      <figure class="slide" id="slide-3" data-state="after">
+        <div class="artwork"><img src="assets/work-placeholder.svg" alt="陈思羽的作品图片待上传"><figcaption class="caption"><span class="student">陈思羽</span></figcaption></div>
       </figure>
-      <figure class="work" data-category="交互设计" style="--delay: 150ms">
-        <img src="assets/work-placeholder.svg" alt="王若曦的作品图片待上传" loading="lazy">
-        <figcaption class="caption"><span class="student">王若曦</span></figcaption>
+      <figure class="slide" id="slide-4" data-state="after">
+        <div class="artwork"><img src="assets/work-placeholder.svg" alt="王若曦的作品图片待上传"><figcaption class="caption"><span class="student">王若曦</span></figcaption></div>
       </figure>
-      <figure class="work" data-category="视觉设计" style="--delay: 200ms">
-        <img src="assets/work-placeholder.svg" alt="刘昊然的作品图片待上传" loading="lazy">
-        <figcaption class="caption"><span class="student">刘昊然</span></figcaption>
+      <figure class="slide" id="slide-5" data-state="after">
+        <div class="artwork"><img src="assets/work-placeholder.svg" alt="刘昊然的作品图片待上传"><figcaption class="caption"><span class="student">刘昊然</span></figcaption></div>
       </figure>
-      <figure class="work" data-category="交互设计" style="--delay: 250ms">
-        <img src="assets/work-placeholder.svg" alt="林小满的作品图片待上传" loading="lazy">
-        <figcaption class="caption"><span class="student">林小满</span></figcaption>
+      <figure class="slide" id="slide-6" data-state="after">
+        <div class="artwork"><img src="assets/work-placeholder.svg" alt="林小满的作品图片待上传"><figcaption class="caption"><span class="student">林小满</span></figcaption></div>
       </figure>
-      <figure class="work" data-category="服务设计" style="--delay: 300ms">
-        <img src="assets/work-placeholder.svg" alt="赵一鸣的作品图片待上传" loading="lazy">
-        <figcaption class="caption"><span class="student">赵一鸣</span></figcaption>
+      <figure class="slide" id="slide-7" data-state="after">
+        <div class="artwork"><img src="assets/work-placeholder.svg" alt="赵一鸣的作品图片待上传"><figcaption class="caption"><span class="student">赵一鸣</span></figcaption></div>
       </figure>
-      <figure class="work" data-category="插画" style="--delay: 350ms">
-        <img src="assets/work-placeholder.svg" alt="周子涵的作品图片待上传" loading="lazy">
-        <figcaption class="caption"><span class="student">周子涵</span></figcaption>
+      <figure class="slide" id="slide-8" data-state="after">
+        <div class="artwork"><img src="assets/work-placeholder.svg" alt="周子涵的作品图片待上传"><figcaption class="caption"><span class="student">周子涵</span></figcaption></div>
       </figure>
-      <figure class="work" data-category="空间设计" style="--delay: 400ms">
-        <img src="assets/work-placeholder.svg" alt="吴佳怡的作品图片待上传" loading="lazy">
-        <figcaption class="caption"><span class="student">吴佳怡</span></figcaption>
+      <figure class="slide" id="slide-9" data-state="after">
+        <div class="artwork"><img src="assets/work-placeholder.svg" alt="吴佳怡的作品图片待上传"><figcaption class="caption"><span class="student">吴佳怡</span></figcaption></div>
       </figure>
-      <figure class="work" data-category="产品设计" style="--delay: 450ms">
-        <img src="assets/work-placeholder.svg" alt="徐嘉乐的作品图片待上传" loading="lazy">
-        <figcaption class="caption"><span class="student">徐嘉乐</span></figcaption>
+      <figure class="slide" id="slide-10" data-state="after">
+        <div class="artwork"><img src="assets/work-placeholder.svg" alt="徐嘉乐的作品图片待上传"><figcaption class="caption"><span class="student">徐嘉乐</span></figcaption></div>
       </figure>
-      <figure class="work" data-category="视觉设计" style="--delay: 500ms">
-        <img src="assets/work-placeholder.svg" alt="宋安然的作品图片待上传" loading="lazy">
-        <figcaption class="caption"><span class="student">宋安然</span></figcaption>
+      <figure class="slide" id="slide-11" data-state="after">
+        <div class="artwork"><img src="assets/work-placeholder.svg" alt="宋安然的作品图片待上传"><figcaption class="caption"><span class="student">宋安然</span></figcaption></div>
       </figure>
-      <figure class="work" data-category="交互设计" style="--delay: 550ms">
-        <img src="assets/work-placeholder.svg" alt="许知夏的作品图片待上传" loading="lazy">
-        <figcaption class="caption"><span class="student">许知夏</span></figcaption>
+      <figure class="slide" id="slide-12" data-state="after">
+        <div class="artwork"><img src="assets/work-placeholder.svg" alt="许知夏的作品图片待上传"><figcaption class="caption"><span class="student">许知夏</span></figcaption></div>
       </figure>
-    </section>
+    </div>
+
+    <nav class="carousel-guide" aria-label="轮播指引">
+      <button class="guide-item" type="button" data-index="0" aria-current="true"><span class="sr-only">查看第 1 张作品</span></button>
+      <button class="guide-item" type="button" data-index="1" aria-current="false"><span class="sr-only">查看第 2 张作品</span></button>
+      <button class="guide-item" type="button" data-index="2" aria-current="false"><span class="sr-only">查看第 3 张作品</span></button>
+      <button class="guide-item" type="button" data-index="3" aria-current="false"><span class="sr-only">查看第 4 张作品</span></button>
+      <button class="guide-item" type="button" data-index="4" aria-current="false"><span class="sr-only">查看第 5 张作品</span></button>
+      <button class="guide-item" type="button" data-index="5" aria-current="false"><span class="sr-only">查看第 6 张作品</span></button>
+      <button class="guide-item" type="button" data-index="6" aria-current="false"><span class="sr-only">查看第 7 张作品</span></button>
+      <button class="guide-item" type="button" data-index="7" aria-current="false"><span class="sr-only">查看第 8 张作品</span></button>
+      <button class="guide-item" type="button" data-index="8" aria-current="false"><span class="sr-only">查看第 9 张作品</span></button>
+      <button class="guide-item" type="button" data-index="9" aria-current="false"><span class="sr-only">查看第 10 张作品</span></button>
+      <button class="guide-item" type="button" data-index="10" aria-current="false"><span class="sr-only">查看第 11 张作品</span></button>
+      <button class="guide-item" type="button" data-index="11" aria-current="false"><span class="sr-only">查看第 12 张作品</span></button>
+    </nav>
+    <p class="sr-only" aria-live="polite" id="carousel-status">正在展示第 1 张作品，李明远</p>
   </main>
 
-  <nav class="filter-dock" aria-label="作业类型筛选">
-    <button class="filter" type="button" data-filter="全部" aria-pressed="true">全部</button>
-    <button class="filter" type="button" data-filter="视觉设计" aria-pressed="false">视觉设计</button>
-    <button class="filter" type="button" data-filter="交互设计" aria-pressed="false">交互设计</button>
-    <button class="filter" type="button" data-filter="产品设计" aria-pressed="false">产品设计</button>
-    <button class="filter" type="button" data-filter="服务设计" aria-pressed="false">服务设计</button>
-    <button class="filter" type="button" data-filter="插画" aria-pressed="false">插画</button>
-    <button class="filter" type="button" data-filter="空间设计" aria-pressed="false">空间设计</button>
-  </nav>
-
-  <span id="about" hidden>面向设计学习者的优秀作业展示平台</span>
-
   <script>
-    const gallery = document.querySelector('.gallery');
-    const works = [...document.querySelectorAll('.work')];
-    const filters = [...document.querySelectorAll('.filter')];
+    const carousel = document.querySelector('.carousel');
+    const slides = [...document.querySelectorAll('.slide')];
+    const guideItems = [...document.querySelectorAll('.guide-item')];
+    const status = document.querySelector('#carousel-status');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const AUTOPLAY_DELAY = 5600;
+    let current = 0;
+    let timer;
+    let pointerStartX = null;
 
-    function syncFixedRatios() {
-      const columns = window.innerWidth <= 680 ? 2 : window.innerWidth <= 980 ? 3 : 4;
-      const styles = getComputedStyle(gallery);
-      const gap = parseFloat(styles.columnGap) || 0;
-      const columnWidth = (gallery.clientWidth - gap * (columns - 1)) / columns;
+    function setSlide(nextIndex, restart = true) {
+      const normalized = (nextIndex + slides.length) % slides.length;
+      if (normalized === current && !restart) return;
 
-      // 基础作品为 4:3；2×2 主图仍保持同一比例，图片始终等比裁切。
-      gallery.style.setProperty('--grid-row', `${columnWidth * 0.75}px`);
+      slides.forEach((slide, index) => {
+        slide.dataset.state = index === normalized ? 'active' : index < normalized ? 'before' : 'after';
+        slide.setAttribute('aria-hidden', String(index !== normalized));
+      });
+
+      guideItems.forEach((item, index) => {
+        item.setAttribute('aria-current', String(index === normalized));
+      });
+
+      current = normalized;
+      const name = slides[current].querySelector('.student').textContent;
+      status.textContent = `正在展示第 ${current + 1} 张作品，${name}`;
+
+      if (restart) startAutoplay();
     }
 
-    let resizeFrame;
-    window.addEventListener('resize', () => {
-      cancelAnimationFrame(resizeFrame);
-      resizeFrame = requestAnimationFrame(syncFixedRatios);
-    });
-    syncFixedRatios();
-
-    function applyFilter(category) {
-      filters.forEach(button => {
-        button.setAttribute('aria-pressed', String(button.dataset.filter === category));
-      });
-
-      works.forEach(work => {
-        work.classList.remove('featured');
-        work.classList.toggle(
-          'is-filtered-out',
-          category !== '全部' && work.dataset.category !== category
-        );
-      });
-
-      const visible = works.filter(work => !work.classList.contains('is-filtered-out'));
-      if (visible[0]) visible[0].classList.add('featured');
-
-      visible.forEach((work, index) => {
-        work.style.animation = 'none';
-        requestAnimationFrame(() => {
-          work.style.setProperty('--delay', `${index * 45}ms`);
-          work.style.animation = '';
-        });
-      });
+    function startAutoplay() {
+      clearTimeout(timer);
+      if (reducedMotion.matches || document.hidden) return;
+      timer = setTimeout(() => setSlide(current + 1), AUTOPLAY_DELAY);
     }
 
-    filters.forEach(button => {
-      button.addEventListener('click', () => applyFilter(button.dataset.filter));
+    guideItems.forEach(item => {
+      item.addEventListener('click', () => setSlide(Number(item.dataset.index)));
     });
+
+    carousel.addEventListener('keydown', event => {
+      if (event.key === 'ArrowRight') setSlide(current + 1);
+      if (event.key === 'ArrowLeft') setSlide(current - 1);
+    });
+
+    carousel.addEventListener('pointerdown', event => {
+      pointerStartX = event.clientX;
+    });
+
+    carousel.addEventListener('pointerup', event => {
+      if (pointerStartX === null) return;
+      const distance = event.clientX - pointerStartX;
+      pointerStartX = null;
+      if (Math.abs(distance) < 50) return;
+      setSlide(distance < 0 ? current + 1 : current - 1);
+    });
+
+    document.addEventListener('visibilitychange', startAutoplay);
+    reducedMotion.addEventListener('change', startAutoplay);
+    setSlide(0);
   </script>
 </body>
 </html>
