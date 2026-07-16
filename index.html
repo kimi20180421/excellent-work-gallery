@@ -177,17 +177,17 @@
     .guide-item[hidden] { display: none; }
 
     .carousel[data-per-view="2"] .slide[data-state="active"] {
-      inset: 0 50% 0 0;
-      padding: clamp(76px, 10vh, 108px) 12px clamp(78px, 9vh, 104px) clamp(18px, 3vw, 48px);
+      inset: 0 0 50%;
+      padding: clamp(68px, 7vh, 82px) clamp(18px, 5vw, 80px) 8px;
     }
 
     .carousel[data-per-view="2"] .slide[data-state="active-secondary"] {
-      inset: 0 0 0 50%;
-      padding: clamp(76px, 10vh, 108px) clamp(18px, 3vw, 48px) clamp(78px, 9vh, 104px) 12px;
+      inset: 50% 0 0;
+      padding: 8px clamp(18px, 5vw, 80px) clamp(62px, 7vh, 76px);
     }
 
     .carousel[data-per-view="2"] .artwork {
-      width: min(46vw, 820px, calc((100svh - 210px) * 16 / 9));
+      width: min(92vw, 1280px, calc((50svh - 118px) * 16 / 9));
     }
 
     .carousel[data-per-view="2"] .caption {
@@ -237,22 +237,6 @@
 
     @keyframes progress {
       to { transform: scaleX(1); }
-    }
-
-    @media (min-width: 900px) and (min-height: 1100px) {
-      .carousel[data-per-view="2"] .slide[data-state="active"] {
-        inset: 0 0 50%;
-        padding: clamp(72px, 7vh, 88px) clamp(18px, 5vw, 80px) 10px;
-      }
-
-      .carousel[data-per-view="2"] .slide[data-state="active-secondary"] {
-        inset: 50% 0 0;
-        padding: 10px clamp(18px, 5vw, 80px) clamp(68px, 7vh, 84px);
-      }
-
-      .carousel[data-per-view="2"] .artwork {
-        width: min(92vw, 1280px, calc((50svh - 108px) * 16 / 9));
-      }
     }
 
     @media (max-width: 680px) {
