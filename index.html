@@ -320,12 +320,15 @@
     const guideItems = [...document.querySelectorAll('.guide-item')];
     const status = document.querySelector('#carousel-status');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const multiScreen = window.matchMedia('(min-width: 900px) and (min-height: 760px)');
     const AUTOPLAY_DELAY = 5600;
+    const TWO_UP_HEIGHT_RESERVE = 118;
+    const TWO_UP_MIN_ARTWORK_WIDTH = 400;
+    const TWO_UP_MIN_VIEWPORT_WIDTH = 700;
     let perView = 1;
     let currentPage = 0;
     let timer;
     let pointerStartX = null;
+    let resizeFrame;
 
     function pageCount() {
       return Math.ceil(slides.length / perView);
@@ -380,13 +383,32 @@
       if (restart) startAutoplay();
     }
 
+    function fitsTwoWorks() {
+      const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      const widthAllowedByViewport = Math.min(viewportWidth * .92, 1280);
+      const imageHeightPerWork = Math.max(0, viewportHeight / 2 - TWO_UP_HEIGHT_RESERVE);
+      const proportionalArtworkWidth = Math.min(
+        widthAllowedByViewport,
+        imageHeightPerWork * 16 / 9
+      );
+
+      return viewportWidth >= TWO_UP_MIN_VIEWPORT_WIDTH
+        && proportionalArtworkWidth >= TWO_UP_MIN_ARTWORK_WIDTH;
+    }
+
     function updateMode() {
       const firstVisible = currentPage * perView;
-      perView = multiScreen.matches ? 2 : 1;
+      perView = fitsTwoWorks() ? 2 : 1;
       carousel.dataset.perView = String(perView);
       currentPage = Math.floor(firstVisible / perView);
       updateGuide();
       setPage(currentPage);
+    }
+
+    function scheduleModeUpdate() {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(updateMode);
     }
 
     function startAutoplay() {
@@ -418,7 +440,8 @@
 
     document.addEventListener('visibilitychange', startAutoplay);
     reducedMotion.addEventListener('change', startAutoplay);
-    multiScreen.addEventListener('change', updateMode);
+    window.addEventListener('resize', scheduleModeUpdate, { passive: true });
+    window.visualViewport?.addEventListener('resize', scheduleModeUpdate, { passive: true });
     updateMode();
   </script>
 </body>
