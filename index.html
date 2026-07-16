@@ -177,17 +177,17 @@
     .guide-item[hidden] { display: none; }
 
     .carousel[data-per-view="2"] .slide[data-state="active"] {
-      inset: 0 0 50%;
-      padding: clamp(72px, 7vh, 88px) clamp(18px, 5vw, 80px) 10px;
+      inset: 0 50% 0 0;
+      padding: clamp(76px, 10vh, 108px) 12px clamp(78px, 9vh, 104px) clamp(18px, 3vw, 48px);
     }
 
     .carousel[data-per-view="2"] .slide[data-state="active-secondary"] {
-      inset: 50% 0 0;
-      padding: 10px clamp(18px, 5vw, 80px) clamp(68px, 7vh, 84px);
+      inset: 0 0 0 50%;
+      padding: clamp(76px, 10vh, 108px) clamp(18px, 3vw, 48px) clamp(78px, 9vh, 104px) 12px;
     }
 
     .carousel[data-per-view="2"] .artwork {
-      width: min(92vw, 1280px, calc((50svh - 108px) * 16 / 9));
+      width: min(46vw, 820px, calc((100svh - 210px) * 16 / 9));
     }
 
     .carousel[data-per-view="2"] .caption {
@@ -237,6 +237,22 @@
 
     @keyframes progress {
       to { transform: scaleX(1); }
+    }
+
+    @media (min-width: 900px) and (min-height: 1100px) {
+      .carousel[data-per-view="2"] .slide[data-state="active"] {
+        inset: 0 0 50%;
+        padding: clamp(72px, 7vh, 88px) clamp(18px, 5vw, 80px) 10px;
+      }
+
+      .carousel[data-per-view="2"] .slide[data-state="active-secondary"] {
+        inset: 50% 0 0;
+        padding: 10px clamp(18px, 5vw, 80px) clamp(68px, 7vh, 84px);
+      }
+
+      .carousel[data-per-view="2"] .artwork {
+        width: min(92vw, 1280px, calc((50svh - 108px) * 16 / 9));
+      }
     }
 
     @media (max-width: 680px) {
@@ -320,7 +336,7 @@
     const guideItems = [...document.querySelectorAll('.guide-item')];
     const status = document.querySelector('#carousel-status');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const tallScreen = window.matchMedia('(min-width: 960px) and (min-height: 1100px)');
+    const multiScreen = window.matchMedia('(min-width: 900px) and (min-height: 760px)');
     const AUTOPLAY_DELAY = 5600;
     let perView = 1;
     let currentPage = 0;
@@ -382,7 +398,7 @@
 
     function updateMode() {
       const firstVisible = currentPage * perView;
-      perView = tallScreen.matches ? 2 : 1;
+      perView = multiScreen.matches ? 2 : 1;
       carousel.dataset.perView = String(perView);
       currentPage = Math.floor(firstVisible / perView);
       updateGuide();
@@ -418,7 +434,7 @@
 
     document.addEventListener('visibilitychange', startAutoplay);
     reducedMotion.addEventListener('change', startAutoplay);
-    tallScreen.addEventListener('change', updateMode);
+    multiScreen.addEventListener('change', updateMode);
     updateMode();
   </script>
 </body>
