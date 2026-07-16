@@ -112,7 +112,8 @@
       transform: translate3d(-10%, 0, 0) scale(.985);
     }
 
-    .slide[data-state="active"] {
+    .slide[data-state="active"],
+    .slide[data-state="active-secondary"] {
       z-index: 2;
       opacity: 1;
       visibility: visible;
@@ -123,7 +124,7 @@
 
     .artwork {
       position: relative;
-      width: min(88vw, 1440px, calc((100svh - 232px) * 16 / 9));
+      width: min(94vw, 1680px, calc((100svh - 210px) * 16 / 9));
     }
 
     .artwork img {
@@ -159,7 +160,7 @@
       z-index: 20;
       width: min(62vw, 360px);
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
+      grid-template-columns: repeat(var(--guide-count, 7), 1fr);
       gap: clamp(5px, .65vw, 9px);
       transform: translateX(-50%);
     }
@@ -171,6 +172,26 @@
       border: 0;
       background: transparent;
       cursor: pointer;
+    }
+
+    .guide-item[hidden] { display: none; }
+
+    .carousel[data-per-view="2"] .slide[data-state="active"] {
+      inset: 0 0 50%;
+      padding: clamp(72px, 7vh, 88px) clamp(18px, 5vw, 80px) 10px;
+    }
+
+    .carousel[data-per-view="2"] .slide[data-state="active-secondary"] {
+      inset: 50% 0 0;
+      padding: 10px clamp(18px, 5vw, 80px) clamp(68px, 7vh, 84px);
+    }
+
+    .carousel[data-per-view="2"] .artwork {
+      width: min(92vw, 1280px, calc((50svh - 108px) * 16 / 9));
+    }
+
+    .carousel[data-per-view="2"] .caption {
+      padding-top: 8px;
     }
 
     .guide-item::before,
@@ -224,7 +245,7 @@
       .brand-suffix { display: none; }
       .slide { padding: 72px 12px 82px; }
       .artwork {
-        width: min(calc(100vw - 24px), calc((100svh - 208px) * 16 / 9));
+        width: min(calc(100vw - 24px), calc((100svh - 190px) * 16 / 9));
       }
       .artwork img { border-radius: 16px; }
       .carousel-guide { width: calc(100vw - 36px); gap: 4px; bottom: 25px; }
@@ -295,44 +316,88 @@
     const guideItems = [...document.querySelectorAll('.guide-item')];
     const status = document.querySelector('#carousel-status');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const tallScreen = window.matchMedia('(min-width: 960px) and (min-height: 1100px)');
     const AUTOPLAY_DELAY = 5600;
-    let current = 0;
+    let perView = 1;
+    let currentPage = 0;
     let timer;
     let pointerStartX = null;
 
-    function setSlide(nextIndex, restart = true) {
-      const normalized = (nextIndex + slides.length) % slides.length;
-      if (normalized === current && !restart) return;
+    function pageCount() {
+      return Math.ceil(slides.length / perView);
+    }
+
+    function updateGuide() {
+      const count = pageCount();
+      document.querySelector('.carousel-guide').style.setProperty('--guide-count', count);
+
+      guideItems.forEach((item, index) => {
+        const visible = index < count;
+        item.hidden = !visible;
+        if (!visible) return;
+        item.dataset.index = index;
+        const label = perView === 2 ? `查看第 ${index + 1} 组作品` : `查看第 ${index + 1} 张作品`;
+        item.querySelector('.sr-only').textContent = label;
+      });
+    }
+
+    function setPage(nextPage, restart = true) {
+      const count = pageCount();
+      const normalized = (nextPage + count) % count;
+      if (normalized === currentPage && !restart) return;
+      const firstVisible = normalized * perView;
+      const secondVisible = perView === 2 && firstVisible + 1 < slides.length ? firstVisible + 1 : -1;
 
       slides.forEach((slide, index) => {
-        slide.dataset.state = index === normalized ? 'active' : index < normalized ? 'before' : 'after';
-        slide.setAttribute('aria-hidden', String(index !== normalized));
+        const state = index === firstVisible
+          ? 'active'
+          : index === secondVisible
+            ? 'active-secondary'
+            : index < firstVisible
+              ? 'before'
+              : 'after';
+        slide.dataset.state = state;
+        slide.setAttribute('aria-hidden', String(index !== firstVisible && index !== secondVisible));
       });
 
       guideItems.forEach((item, index) => {
         item.setAttribute('aria-current', String(index === normalized));
       });
 
-      current = normalized;
-      const name = slides[current].querySelector('.student').textContent;
-      status.textContent = `正在展示第 ${current + 1} 张作品，${name}`;
+      currentPage = normalized;
+      const firstName = slides[firstVisible].querySelector('.student').textContent;
+      if (secondVisible >= 0) {
+        const secondName = slides[secondVisible].querySelector('.student').textContent;
+        status.textContent = `正在展示第 ${firstVisible + 1} 至 ${secondVisible + 1} 张作品，${firstName}、${secondName}`;
+      } else {
+        status.textContent = `正在展示第 ${firstVisible + 1} 张作品，${firstName}`;
+      }
 
       if (restart) startAutoplay();
+    }
+
+    function updateMode() {
+      const firstVisible = currentPage * perView;
+      perView = tallScreen.matches ? 2 : 1;
+      carousel.dataset.perView = String(perView);
+      currentPage = Math.floor(firstVisible / perView);
+      updateGuide();
+      setPage(currentPage);
     }
 
     function startAutoplay() {
       clearTimeout(timer);
       if (reducedMotion.matches || document.hidden) return;
-      timer = setTimeout(() => setSlide(current + 1), AUTOPLAY_DELAY);
+      timer = setTimeout(() => setPage(currentPage + 1), AUTOPLAY_DELAY);
     }
 
     guideItems.forEach(item => {
-      item.addEventListener('click', () => setSlide(Number(item.dataset.index)));
+      item.addEventListener('click', () => setPage(Number(item.dataset.index)));
     });
 
     carousel.addEventListener('keydown', event => {
-      if (event.key === 'ArrowRight') setSlide(current + 1);
-      if (event.key === 'ArrowLeft') setSlide(current - 1);
+      if (event.key === 'ArrowRight') setPage(currentPage + 1);
+      if (event.key === 'ArrowLeft') setPage(currentPage - 1);
     });
 
     carousel.addEventListener('pointerdown', event => {
@@ -344,12 +409,13 @@
       const distance = event.clientX - pointerStartX;
       pointerStartX = null;
       if (Math.abs(distance) < 50) return;
-      setSlide(distance < 0 ? current + 1 : current - 1);
+      setPage(distance < 0 ? currentPage + 1 : currentPage - 1);
     });
 
     document.addEventListener('visibilitychange', startAutoplay);
     reducedMotion.addEventListener('change', startAutoplay);
-    setSlide(0);
+    tallScreen.addEventListener('change', updateMode);
+    updateMode();
   </script>
 </body>
 </html>
