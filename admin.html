@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c1113">
+  <title>内容后台 · 像素100&奇点同行</title>
+  <style>
+    :root {
+      --ink: #0c1113;
+      --paper: #edf2f1;
+      --panel: #141d1f;
+      --line: rgba(237, 242, 241, .14);
+      --muted: rgba(237, 242, 241, .58);
+      --cyan: #63d8e8;
+      --warm: #e7a36f;
+      --radius: 18px;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--paper);
+      background:
+        radial-gradient(circle at 92% 6%, rgba(99, 216, 232, .12), transparent 26rem),
+        radial-gradient(circle at 8% 100%, rgba(231, 163, 111, .1), transparent 25rem),
+        var(--ink);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    input,
+    select,
+    textarea { font: inherit; }
+
+    .shell {
+      width: min(1440px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+
+    .topbar,
+    .headline,
+    .workspace,
+    .list-head,
+    .content-row,
+    .form-actions {
+      display: flex;
+      align-items: center;
+    }
+
+    .topbar { justify-content: space-between; }
+
+    .brand,
+    .site-link {
+      color: var(--paper);
+      text-decoration: none;
+    }
+
+    .brand {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .brand span { color: var(--muted); font-weight: 400; }
+
+    .site-link {
+      color: var(--muted);
+      font-size: 14px;
+      transition: color .24s ease;
+    }
+
+    .site-link:hover,
+    .site-link:focus-visible { color: var(--cyan); }
+
+    .headline {
+      justify-content: space-between;
+      gap: 30px;
+      padding: clamp(56px, 10vh, 120px) 0 clamp(30px, 5vh, 54px);
+    }
+
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: .16em;
+    }
+
+    h1 {
+      max-width: 9em;
+      margin: 0;
+      font-size: clamp(38px, 6vw, 78px);
+      font-weight: 500;
+      letter-spacing: -.055em;
+      line-height: 1.03;
+    }
+
+    .headline-copy {
+      width: min(320px, 38vw);
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .workspace {
+      align-items: stretch;
+      gap: 18px;
+    }
+
+    .entry-panel,
+    .library-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(20, 29, 31, .76);
+    }
+
+    .entry-panel {
+      width: min(440px, 38%);
+      padding: clamp(22px, 3vw, 34px);
+    }
+
+    .library-panel {
+      flex: 1;
+      min-width: 0;
+      padding: clamp(22px, 3vw, 34px);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 500;
+      letter-spacing: -.02em;
+    }
+
+    .panel-note {
+      margin: 9px 0 24px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .field-grid { display: grid; gap: 16px; }
+
+    .field { display: grid; gap: 8px; }
+
+    label {
+      color: rgba(237, 242, 241, .76);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .optional { color: var(--muted); font-weight: 400; }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid rgba(237, 242, 241, .16);
+      border-radius: 10px;
+      outline: 0;
+      color: var(--paper);
+      background: rgba(4, 8, 9, .36);
+      padding: 12px 13px;
+      transition: border-color .24s ease, background .24s ease;
+    }
+
+    select option { color: var(--ink); }
+
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--cyan);
+      background: rgba(4, 8, 9, .56);
+    }
+
+    input[type="file"] {
+      padding: 9px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .preview {
+      display: none;
+      width: 100%;
+      margin-top: 4px;
+      border-radius: 11px;
+      background: #091012;
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
+    }
+
+    .preview.is-visible { display: block; }
+
+    .form-actions {
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .button {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 16px;
+      color: var(--ink);
+      background: var(--cyan);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform .24s var(--ease), background .24s ease;
+    }
+
+    .button:hover { transform: translateY(-2px); background: #91e6ef; }
+    .button:active { transform: translateY(0); }
+
+    .button.secondary {
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid rgba(237, 242, 241, .16);
+    }
+
+    .button.secondary:hover { color: var(--paper); background: rgba(237, 242, 241, .07); }
+
+    .library-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .stat {
+      min-width: 54px;
+      padding: 7px 9px;
+      border: 1px solid rgba(237, 242, 241, .12);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--paper);
+      font-size: 17px;
+      font-weight: 500;
+    }
+
+    .content-list { margin-top: 28px; }
+
+    .list-head,
+    .content-row {
+      gap: 14px;
+      padding: 0 0 12px;
+      border-bottom: 1px solid rgba(237, 242, 241, .1);
+    }
+
+    .list-head {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .1em;
+    }
+
+    .content-row {
+      padding: 14px 0;
+    }
+
+    .content-thumb {
+      width: 84px;
+      height: 48px;
+      flex: 0 0 auto;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #091012;
+    }
+
+    .content-main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .content-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .content-meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .type-tag {
+      min-width: 78px;
+      color: var(--cyan);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .delete-button {
+      border: 0;
+      color: var(--muted);
+      background: transparent;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .delete-button:hover { color: #f08e82; }
+
+    .empty {
+      padding: 52px 0;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .notice {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 10;
+      max-width: min(360px, calc(100vw - 40px));
+      padding: 13px 16px;
+      border: 1px solid rgba(99, 216, 232, .32);
+      border-radius: 12px;
+      color: var(--paper);
+      background: #122023;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity .24s ease, transform .24s var(--ease);
+    }
+
+    .notice.is-visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 860px) {
+      .headline { align-items: flex-end; }
+      .workspace { display: grid; }
+      .entry-panel { width: auto; }
+    }
+
+    @media (max-width: 600px) {
+      .shell { width: min(100% - 24px, 1440px); padding-top: 18px; }
+      .headline { display: block; padding-top: 68px; }
+      .headline-copy { width: auto; margin-top: 20px; }
+      .library-top { display: block; }
+      .stats { justify-content: flex-start; margin-top: 20px; }
+      .type-tag { display: none; }
+      .content-thumb { width: 68px; height: 44px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">像素100&奇点同行 <span>· 内容后台</span></a>
+      <a class="site-link" href="index.html">查看前台</a>
+    </header>
+
+    <section class="headline">
+      <div>
+        <p class="eyebrow">CONTENT CONTROL ROOM</p>
+        <h1>让每一条成长，都有自己的播放位置。</h1>
+      </div>
+      <p class="headline-copy">录入后刷新前台即可播放。内容仅保存于当前浏览器；适合本地维护和现场展示。</p>
+    </section>
+
+    <section class="workspace">
+      <form class="entry-panel" id="content-form">
+        <h2>录入内容</h2>
+        <p class="panel-note">图片推荐 16:9。视频建议填写可公开访问的 MP4 地址，避免浏览器本地存储超限。</p>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="channel">内容类别</label>
+            <select id="channel" name="channel">
+              <option value="works">优秀作业展</option>
+              <option value="offers">Offer 捷报</option>
+              <option value="interviews">面试间接龙</option>
+              <option value="moments">轻松一刻</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="title">标题</label>
+            <input id="title" name="title" maxlength="60" placeholder="例如：腾讯互动娱乐设计岗 Offer">
+          </div>
+
+          <div class="field">
+            <label for="author">作者 / 投稿人</label>
+            <input id="author" name="author" maxlength="40" placeholder="例如：张同学">
+          </div>
+
+          <div class="field">
+            <label for="media-type">媒体类型</label>
+            <select id="media-type" name="mediaType">
+              <option value="image">图片</option>
+              <option value="video">视频</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="media-url">媒体地址 <span class="optional">填写地址或上传图片二选一</span></label>
+            <input id="media-url" name="source" type="url" placeholder="https://example.com/content.jpg 或 .mp4">
+          </div>
+
+          <div class="field" id="upload-field">
+            <label for="media-file">上传图片 <span class="optional">建议小于 2MB</span></label>
+            <input id="media-file" type="file" accept="image/*">
+          </div>
+
+          <div class="field">
+            <label for="description">说明 <span class="optional">可选</span></label>
+            <textarea id="description" name="description" maxlength="140" placeholder="用于后台识别与归档，不会覆盖前台作品图。"></textarea>
+          </div>
+
+          <img class="preview" id="preview" alt="上传图片预览">
+        </div>
+
+        <div class="form-actions">
+          <button class="button secondary" type="reset">清空</button>
+          <button class="button" type="submit">保存并加入播放</button>
+        </div>
+      </form>
+
+      <section class="library-panel">
+        <div class="library-top">
+          <div>
+            <h2>内容库</h2>
+            <p class="panel-note">这里的内容会按类别自动加入前台频道。</p>
+          </div>
+          <div class="stats" id="stats"></div>
+        </div>
+
+        <div class="content-list" id="content-list"></div>
+      </section>
+    </section>
+  </main>
+
+  <div class="notice" id="notice" role="status" aria-live="polite"></div>
+
+  <script>
+    const CONTENT_STORAGE_KEY = 'pixel100-gallery-content-v1';
+    const channelNames = {
+      works: '优秀作业展',
+      offers: 'Offer 捷报',
+      interviews: '面试间接龙',
+      moments: '轻松一刻'
+    };
+    const form = document.querySelector('#content-form');
+    const sourceInput = document.querySelector('#media-url');
+    const fileInput = document.querySelector('#media-file');
+    const mediaType = document.querySelector('#media-type');
+    const uploadField = document.querySelector('#upload-field');
+    const preview = document.querySelector('#preview');
+    const contentList = document.querySelector('#content-list');
+    const stats = document.querySelector('#stats');
+    const notice = document.querySelector('#notice');
+    let uploadedSource = '';
+    let noticeTimer;
+
+    function readContent() {
+      try {
+        return JSON.parse(localStorage.getItem(CONTENT_STORAGE_KEY) || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function saveContent(content) {
+      localStorage.setItem(CONTENT_STORAGE_KEY, JSON.stringify(content));
+    }
+
+    function showNotice(message) {
+      notice.textContent = message;
+      notice.classList.add('is-visible');
+      clearTimeout(noticeTimer);
+      noticeTimer = setTimeout(() => notice.classList.remove('is-visible'), 3000);
+    }
+
+    function renderStats(content) {
+      stats.replaceChildren();
+      Object.entries(channelNames).forEach(([key, name]) => {
+        const item = document.createElement('div');
+        item.className = 'stat';
+        const count = content.filter(entry => entry.channel === key).length;
+        item.innerHTML = `<strong>${count}</strong>${name}`;
+        stats.append(item);
+      });
+    }
+
+    function renderList() {
+      const content = readContent();
+      contentList.replaceChildren();
+      renderStats(content);
+
+      if (!content.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = '还没有后台录入内容。先添加一条，刷新前台即可播放。';
+        contentList.append(empty);
+        return;
+      }
+
+      content
+        .slice()
+        .reverse()
+        .forEach(entry => {
+          const row = document.createElement('div');
+          row.className = 'content-row';
+
+          const thumb = entry.mediaType === 'video'
+            ? document.createElement('video')
+            : document.createElement('img');
+          thumb.className = 'content-thumb';
+          thumb.src = entry.source;
+          thumb.preload = 'metadata';
+          thumb.muted = true;
+
+          const main = document.createElement('div');
+          main.className = 'content-main';
+          const title = document.createElement('div');
+          title.className = 'content-title';
+          title.textContent = entry.title || '未命名内容';
+          const meta = document.createElement('div');
+          meta.className = 'content-meta';
+          meta.textContent = `作者：${entry.author || '未填写'}${entry.description ? ` · ${entry.description}` : ''}`;
+          main.append(title, meta);
+
+          const type = document.createElement('div');
+          type.className = 'type-tag';
+          type.textContent = channelNames[entry.channel] || channelNames.works;
+
+          const remove = document.createElement('button');
+          remove.className = 'delete-button';
+          remove.type = 'button';
+          remove.textContent = '删除';
+          remove.addEventListener('click', () => {
+            const nextContent = readContent().filter(item => item.id !== entry.id);
+            saveContent(nextContent);
+            renderList();
+            showNotice('内容已从本地内容库移除。');
+          });
+
+          row.append(thumb, main, type, remove);
+          contentList.append(row);
+        });
+    }
+
+    function resetPreview() {
+      uploadedSource = '';
+      preview.removeAttribute('src');
+      preview.classList.remove('is-visible');
+    }
+
+    mediaType.addEventListener('change', () => {
+      const isVideo = mediaType.value === 'video';
+      uploadField.hidden = isVideo;
+      fileInput.value = '';
+      resetPreview();
+    });
+
+    fileInput.addEventListener('change', () => {
+      const [file] = fileInput.files;
+      if (!file) {
+        resetPreview();
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        fileInput.value = '';
+        resetPreview();
+        showNotice('图片超过 2MB，建议压缩后再上传，避免本地内容库写入失败。');
+        return;
+      }
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        uploadedSource = reader.result;
+        preview.src = uploadedSource;
+        preview.classList.add('is-visible');
+        sourceInput.value = '';
+      });
+      reader.readAsDataURL(file);
+    });
+
+    form.addEventListener('reset', () => {
+      requestAnimationFrame(() => {
+        uploadField.hidden = false;
+        resetPreview();
+      });
+    });
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const source = uploadedSource || String(data.get('source') || '').trim();
+      const channel = String(data.get('channel'));
+      const type = String(data.get('mediaType'));
+
+      if (!source) {
+        showNotice('请填写媒体地址，或上传一张图片。');
+        return;
+      }
+
+      const content = readContent();
+      content.push({
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        channel,
+        title: String(data.get('title') || '').trim(),
+        author: String(data.get('author') || '').trim(),
+        description: String(data.get('description') || '').trim(),
+        mediaType: type,
+        source,
+        createdAt: new Date().toISOString()
+      });
+
+      try {
+        saveContent(content);
+      } catch {
+        showNotice('保存失败：本地存储空间不足。请使用外部图片地址或更小的图片。');
+        return;
+      }
+
+      form.reset();
+      renderList();
+      showNotice(`已加入「${channelNames[channel]}」，刷新前台即可播放。`);
+    });
+
+    renderList();
+  </script>
+</body>
+</html>

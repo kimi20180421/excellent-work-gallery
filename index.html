@@ -71,6 +71,21 @@
       font-weight: 400;
     }
 
+    .admin-link {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      pointer-events: auto;
+      transition: color 240ms ease;
+    }
+
+    .admin-link:hover,
+    .admin-link:focus-visible {
+      color: var(--cyan);
+    }
+
     .carousel {
       position: relative;
       width: 100vw;
@@ -126,7 +141,8 @@
       width: min(94vw, 1680px, calc((100svh - 210px) * 16 / 9));
     }
 
-    .artwork img {
+    .artwork img,
+    .artwork video {
       width: 100%;
       height: auto;
       aspect-ratio: 16 / 9;
@@ -356,6 +372,7 @@
       <span>像素100&amp;奇点同行</span>
       <span class="brand-suffix">· 优秀作业展</span>
     </a>
+    <a class="admin-link" href="admin.html">内容后台</a>
   </header>
 
   <main class="carousel" aria-label="优秀学生作业轮播" tabindex="0">
@@ -431,9 +448,64 @@
   </main>
 
   <script>
+    const CONTENT_STORAGE_KEY = 'pixel100-gallery-content-v1';
+    let managedContent = [];
+    try {
+      managedContent = JSON.parse(localStorage.getItem(CONTENT_STORAGE_KEY) || '[]');
+    } catch {
+      managedContent = [];
+    }
+    const slidesContainer = document.querySelector('.slides');
+
+    function appendManagedContent(content, index) {
+      const slide = document.createElement('figure');
+      const channel = ['works', 'offers', 'interviews', 'moments'].includes(content.channel)
+        ? content.channel
+        : 'works';
+      const title = content.title || '未命名内容';
+      const author = content.author || '像素100&奇点同行';
+      const media = content.mediaType === 'video'
+        ? document.createElement('video')
+        : document.createElement('img');
+
+      slide.className = 'slide';
+      slide.id = `managed-slide-${index}`;
+      slide.dataset.channel = channel;
+      slide.dataset.state = 'after';
+
+      media.src = content.source;
+      media.alt = `${author}的内容：${title}`;
+      media.preload = 'metadata';
+      if (content.mediaType === 'video') {
+        media.controls = true;
+        media.playsInline = true;
+      } else {
+        media.loading = 'lazy';
+      }
+
+      const artwork = document.createElement('div');
+      artwork.className = 'artwork';
+      artwork.append(media);
+
+      const caption = document.createElement('figcaption');
+      caption.className = 'caption';
+      const student = document.createElement('span');
+      student.className = 'student';
+      student.textContent = `${content.title ? `${title} · ` : ''}作者：${author}`;
+      caption.append(student);
+      artwork.append(caption);
+      slide.append(artwork);
+      slidesContainer.append(slide);
+    }
+
+    managedContent
+      .filter(content => content && content.source)
+      .forEach(appendManagedContent);
+
     const carousel = document.querySelector('.carousel');
     const slides = [...document.querySelectorAll('.slide')];
-    const guideItems = [...document.querySelectorAll('.guide-item')];
+    const guide = document.querySelector('.carousel-guide');
+    let guideItems = [...document.querySelectorAll('.guide-item')];
     const channelItems = [...document.querySelectorAll('.channel-item')];
     const status = document.querySelector('#carousel-status');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -459,7 +531,20 @@
 
     function updateGuide() {
       const count = pageCount();
-      document.querySelector('.carousel-guide').style.setProperty('--guide-count', count);
+      while (guideItems.length < count) {
+        const item = document.createElement('button');
+        const label = document.createElement('span');
+        item.className = 'guide-item';
+        item.type = 'button';
+        item.setAttribute('aria-current', 'false');
+        label.className = 'sr-only';
+        item.append(label);
+        item.addEventListener('click', () => setPage(Number(item.dataset.index)));
+        guide.append(item);
+        guideItems.push(item);
+      }
+
+      guide.style.setProperty('--guide-count', count);
 
       guideItems.forEach((item, index) => {
         const visible = index < count;
