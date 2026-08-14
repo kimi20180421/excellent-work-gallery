@@ -155,13 +155,55 @@
     .carousel-guide {
       position: fixed;
       left: 50%;
-      bottom: clamp(26px, 4vh, 42px);
+      bottom: clamp(76px, 9vh, 100px);
       z-index: 20;
       width: min(62vw, 360px);
       display: grid;
       grid-template-columns: repeat(var(--guide-count, 8), 1fr);
       gap: clamp(5px, .65vw, 9px);
       transform: translateX(-50%);
+    }
+
+    .channel-nav {
+      position: fixed;
+      left: 50%;
+      bottom: clamp(18px, 2.5vh, 30px);
+      z-index: 20;
+      display: flex;
+      max-width: calc(100vw - 36px);
+      gap: 5px;
+      padding: 5px;
+      overflow-x: auto;
+      border: 1px solid rgba(244, 247, 248, .14);
+      border-radius: 999px;
+      background: rgba(8, 9, 9, .72);
+      transform: translateX(-50%);
+      scrollbar-width: none;
+    }
+
+    .channel-nav::-webkit-scrollbar { display: none; }
+
+    .channel-item {
+      flex: 0 0 auto;
+      padding: 9px 13px;
+      border: 0;
+      border-radius: 999px;
+      color: var(--muted);
+      background: transparent;
+      font-size: clamp(12px, 1vw, 14px);
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 240ms ease, background 240ms ease;
+    }
+
+    .channel-item[aria-current="true"] {
+      color: var(--white);
+      background: rgba(99, 216, 232, .16);
+    }
+
+    .channel-item:focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 2px;
     }
 
     .guide-item {
@@ -174,6 +216,48 @@
     }
 
     .guide-item[hidden] { display: none; }
+
+    .category-slide {
+      background:
+        radial-gradient(circle at 28% 26%, rgba(99, 216, 232, .16), transparent 24%),
+        radial-gradient(circle at 72% 70%, rgba(49, 89, 217, .18), transparent 28%);
+    }
+
+    .category-message {
+      width: min(86vw, 760px);
+      padding: clamp(28px, 5vw, 64px);
+      border: 1px solid rgba(244, 247, 248, .16);
+      border-radius: var(--radius);
+      background: rgba(16, 19, 20, .68);
+    }
+
+    .category-label,
+    .category-title,
+    .category-copy {
+      display: block;
+    }
+
+    .category-label {
+      margin-bottom: 14px;
+      color: var(--cyan);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: .16em;
+    }
+
+    .category-title {
+      font-size: clamp(32px, 5vw, 68px);
+      font-weight: 500;
+      letter-spacing: -.04em;
+    }
+
+    .category-copy {
+      max-width: 32em;
+      margin-top: 18px;
+      color: rgba(244, 247, 248, .62);
+      font-size: clamp(15px, 1.35vw, 19px);
+      line-height: 1.75;
+    }
 
     .carousel[data-per-view="2"] .slide[data-state="active"] {
       inset: 0 0 50%;
@@ -247,7 +331,9 @@
         width: min(calc(100vw - 24px), calc((100svh - 190px) * 16 / 9));
       }
       .artwork img { border-radius: 16px; }
-      .carousel-guide { width: calc(100vw - 36px); gap: 4px; bottom: 25px; }
+      .carousel-guide { width: calc(100vw - 36px); gap: 4px; bottom: 76px; }
+      .channel-nav { width: calc(100vw - 24px); justify-content: flex-start; }
+      .channel-item { padding: 8px 11px; }
       .caption { padding: 12px 2px 0; }
     }
 
@@ -310,6 +396,15 @@
       <figure class="slide" id="slide-12" data-state="after">
         <div class="artwork"><img src="assets/chen.png" alt="陈静芸的优秀作业：QQ招兽闹新春分享海报"><figcaption class="caption"><span class="student">作者：陈静芸</span></figcaption></div>
       </figure>
+      <figure class="slide category-slide" id="offer-news" data-channel="offers" data-state="after">
+        <div class="category-message"><span class="category-label">PIXEL 100 · CAREER NEWS</span><span class="category-title">Offer 捷报</span><span class="category-copy">记录每一份努力抵达的好消息。将 Offer 海报、入职喜报和成长故事放在这里。</span></div>
+      </figure>
+      <figure class="slide category-slide" id="interview-chain" data-channel="interviews" data-state="after">
+        <div class="category-message"><span class="category-label">PIXEL 100 · INTERVIEW NOTES</span><span class="category-title">面试间接龙</span><span class="category-copy">汇集面试复盘、经验传递与真题笔记，让下一位同学从前一位的经验继续出发。</span></div>
+      </figure>
+      <figure class="slide category-slide" id="easy-moments" data-channel="moments" data-state="after">
+        <div class="category-message"><span class="category-label">PIXEL 100 · EASY MOMENTS</span><span class="category-title">轻松一刻</span><span class="category-copy">留住学习间隙的放松时刻。后续可在这里加入课堂花絮、短视频和活动照片。</span></div>
+      </figure>
     </div>
 
     <nav class="carousel-guide" aria-label="轮播指引">
@@ -326,6 +421,12 @@
       <button class="guide-item" type="button" data-index="10" aria-current="false"><span class="sr-only">查看第 11 张作品</span></button>
       <button class="guide-item" type="button" data-index="11" aria-current="false"><span class="sr-only">查看第 12 张作品</span></button>
     </nav>
+    <nav class="channel-nav" aria-label="内容频道">
+      <button class="channel-item" type="button" data-channel="works" aria-current="true">优秀作业展</button>
+      <button class="channel-item" type="button" data-channel="offers" aria-current="false">Offer 捷报</button>
+      <button class="channel-item" type="button" data-channel="interviews" aria-current="false">面试间接龙</button>
+      <button class="channel-item" type="button" data-channel="moments" aria-current="false">轻松一刻</button>
+    </nav>
     <p class="sr-only" aria-live="polite" id="carousel-status">正在展示第 1 张作品，作者：黎浩民</p>
   </main>
 
@@ -333,20 +434,27 @@
     const carousel = document.querySelector('.carousel');
     const slides = [...document.querySelectorAll('.slide')];
     const guideItems = [...document.querySelectorAll('.guide-item')];
+    const channelItems = [...document.querySelectorAll('.channel-item')];
     const status = document.querySelector('#carousel-status');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const AUTOPLAY_DELAY = 5600;
     const TWO_UP_HEIGHT_RESERVE = 118;
     const TWO_UP_MIN_ARTWORK_WIDTH = 400;
     const TWO_UP_MIN_VIEWPORT_WIDTH = 700;
+    const channelOrder = channelItems.map(item => item.dataset.channel);
     let perView = 1;
     let currentPage = 0;
+    let currentChannel = channelOrder[0];
     let timer;
     let pointerStartX = null;
     let resizeFrame;
 
+    function channelSlides() {
+      return slides.filter(slide => (slide.dataset.channel || 'works') === currentChannel);
+    }
+
     function pageCount() {
-      return Math.ceil(slides.length / perView);
+      return Math.ceil(channelSlides().length / perView);
     }
 
     function updateGuide() {
@@ -363,14 +471,22 @@
       });
     }
 
+    function updateChannelNav() {
+      channelItems.forEach(item => {
+        item.setAttribute('aria-current', String(item.dataset.channel === currentChannel));
+      });
+    }
+
     function setPage(nextPage, restart = true) {
+      const currentSlides = channelSlides();
       const count = pageCount();
       const normalized = (nextPage + count) % count;
       if (normalized === currentPage && !restart) return;
       const firstVisible = normalized * perView;
-      const secondVisible = perView === 2 && firstVisible + 1 < slides.length ? firstVisible + 1 : -1;
+      const secondVisible = perView === 2 && firstVisible + 1 < currentSlides.length ? firstVisible + 1 : -1;
 
-      slides.forEach((slide, index) => {
+      slides.forEach(slide => {
+        const index = currentSlides.indexOf(slide);
         const state = index === firstVisible
           ? 'active'
           : index === secondVisible
@@ -387,15 +503,39 @@
       });
 
       currentPage = normalized;
-      const firstName = slides[firstVisible].querySelector('.student').textContent;
+      const firstName = currentSlides[firstVisible].querySelector('.student')?.textContent || channelItems.find(item => item.dataset.channel === currentChannel).textContent;
       if (secondVisible >= 0) {
-        const secondName = slides[secondVisible].querySelector('.student').textContent;
+        const secondName = currentSlides[secondVisible].querySelector('.student')?.textContent || firstName;
         status.textContent = `正在展示第 ${firstVisible + 1} 至 ${secondVisible + 1} 张作品，${firstName}、${secondName}`;
       } else {
-        status.textContent = `正在展示第 ${firstVisible + 1} 张作品，${firstName}`;
+        status.textContent = `正在展示${channelItems.find(item => item.dataset.channel === currentChannel).textContent}：${firstName}`;
       }
 
       if (restart) startAutoplay();
+    }
+
+    function selectChannel(channel, restart = true) {
+      currentChannel = channel;
+      currentPage = 0;
+      carousel.dataset.channel = channel;
+      perView = channelSlides().length > 1 && fitsTwoWorks() ? 2 : 1;
+      carousel.dataset.perView = String(perView);
+      updateChannelNav();
+      updateGuide();
+      setPage(0, restart);
+    }
+
+    function advancePage(direction = 1) {
+      const nextPage = currentPage + direction;
+      if (nextPage >= 0 && nextPage < pageCount()) {
+        setPage(nextPage);
+        return;
+      }
+
+      const channelIndex = channelOrder.indexOf(currentChannel);
+      const nextChannelIndex = (channelIndex + direction + channelOrder.length) % channelOrder.length;
+      selectChannel(channelOrder[nextChannelIndex], false);
+      setPage(direction > 0 ? 0 : pageCount() - 1);
     }
 
     function fitsTwoWorks() {
@@ -414,7 +554,7 @@
 
     function updateMode() {
       const firstVisible = currentPage * perView;
-      perView = fitsTwoWorks() ? 2 : 1;
+      perView = channelSlides().length > 1 && fitsTwoWorks() ? 2 : 1;
       carousel.dataset.perView = String(perView);
       currentPage = Math.floor(firstVisible / perView);
       updateGuide();
@@ -429,16 +569,20 @@
     function startAutoplay() {
       clearTimeout(timer);
       if (reducedMotion.matches || document.hidden) return;
-      timer = setTimeout(() => setPage(currentPage + 1), AUTOPLAY_DELAY);
+      timer = setTimeout(() => advancePage(), AUTOPLAY_DELAY);
     }
 
     guideItems.forEach(item => {
       item.addEventListener('click', () => setPage(Number(item.dataset.index)));
     });
 
+    channelItems.forEach(item => {
+      item.addEventListener('click', () => selectChannel(item.dataset.channel));
+    });
+
     carousel.addEventListener('keydown', event => {
-      if (event.key === 'ArrowRight') setPage(currentPage + 1);
-      if (event.key === 'ArrowLeft') setPage(currentPage - 1);
+      if (event.key === 'ArrowRight') advancePage();
+      if (event.key === 'ArrowLeft') advancePage(-1);
     });
 
     carousel.addEventListener('pointerdown', event => {
@@ -450,14 +594,14 @@
       const distance = event.clientX - pointerStartX;
       pointerStartX = null;
       if (Math.abs(distance) < 50) return;
-      setPage(distance < 0 ? currentPage + 1 : currentPage - 1);
+      advancePage(distance < 0 ? 1 : -1);
     });
 
     document.addEventListener('visibilitychange', startAutoplay);
     reducedMotion.addEventListener('change', startAutoplay);
     window.addEventListener('resize', scheduleModeUpdate, { passive: true });
     window.visualViewport?.addEventListener('resize', scheduleModeUpdate, { passive: true });
-    updateMode();
+    selectChannel(currentChannel);
   </script>
 </body>
 </html>
