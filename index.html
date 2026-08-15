@@ -447,13 +447,25 @@
       managedContent = [];
     }
     const slidesContainer = document.querySelector('.slides');
+    const managedChannels = new Set(['works', 'offers', 'interviews', 'moments']);
+
+    function isValidManagedContent(content) {
+      return Boolean(
+        content
+        && typeof content.id === 'string'
+        && managedChannels.has(content.channel)
+        && typeof content.title === 'string'
+        && content.title.trim()
+        && ['image', 'video'].includes(content.mediaType)
+        && typeof content.source === 'string'
+        && content.source.trim()
+      );
+    }
 
     function appendManagedContent(content, index) {
       const slide = document.createElement('figure');
-      const channel = ['works', 'offers', 'interviews', 'moments'].includes(content.channel)
-        ? content.channel
-        : 'works';
-      const title = content.title || '未命名内容';
+      const channel = content.channel;
+      const title = content.title.trim();
       const author = content.author || '像素100&奇点同行';
       const media = content.mediaType === 'video'
         ? document.createElement('video')
@@ -483,7 +495,7 @@
     }
 
     managedContent
-      .filter(content => content && content.source)
+      .filter(isValidManagedContent)
       .forEach(appendManagedContent);
 
     const carousel = document.querySelector('.carousel');

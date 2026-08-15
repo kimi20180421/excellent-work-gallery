@@ -411,7 +411,7 @@
 
           <div class="field">
             <label for="title">标题</label>
-            <input id="title" name="title" maxlength="60" placeholder="例如：腾讯互动娱乐设计岗 Offer">
+            <input id="title" name="title" maxlength="60" placeholder="例如：腾讯互动娱乐设计岗 Offer" required>
           </div>
 
           <div class="field">
@@ -475,6 +475,7 @@
       interviews: '面试间接龙',
       moments: '轻松一刻'
     };
+    const managedChannels = new Set(Object.keys(channelNames));
     const builtinContent = [
       { id: 'builtin-01', channel: 'works', title: '视觉语言形状分析', author: '黎浩民', source: 'assets/li-haomin-01.webp' },
       { id: 'builtin-02', channel: 'works', title: '视觉语言质感分析', author: '黎浩民', source: 'assets/li-haomin-02.webp' },
@@ -503,10 +504,24 @@
 
     function readContent() {
       try {
-        return JSON.parse(localStorage.getItem(CONTENT_STORAGE_KEY) || '[]');
+        const content = JSON.parse(localStorage.getItem(CONTENT_STORAGE_KEY) || '[]');
+        return Array.isArray(content) ? content.filter(isValidManagedContent) : [];
       } catch {
         return [];
       }
+    }
+
+    function isValidManagedContent(content) {
+      return Boolean(
+        content
+        && typeof content.id === 'string'
+        && managedChannels.has(content.channel)
+        && typeof content.title === 'string'
+        && content.title.trim()
+        && ['image', 'video'].includes(content.mediaType)
+        && typeof content.source === 'string'
+        && content.source.trim()
+      );
     }
 
     function saveContent(content) {
@@ -638,12 +653,13 @@
     form.addEventListener('submit', event => {
       event.preventDefault();
       const data = new FormData(form);
+      const title = String(data.get('title') || '').trim();
       const source = uploadedSource || String(data.get('source') || '').trim();
       const channel = String(data.get('channel'));
       const type = String(data.get('mediaType'));
 
-      if (!source) {
-        showNotice('请填写媒体地址，或上传一张图片。');
+      if (!title || !source) {
+        showNotice('请填写标题，并填写媒体地址或上传一张图片。');
         return;
       }
 
@@ -651,7 +667,7 @@
       content.push({
         id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
         channel,
-        title: String(data.get('title') || '').trim(),
+        title,
         author: String(data.get('author') || '').trim(),
         description: String(data.get('description') || '').trim(),
         mediaType: type,
