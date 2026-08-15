@@ -363,7 +363,7 @@
     <section class="workspace">
       <form class="entry-panel" id="content-form">
         <h2>录入内容</h2>
-        <p class="panel-note">图片推荐 16:9。视频建议填写可公开访问的 MP4 地址，避免浏览器本地存储超限。</p>
+        <p class="panel-note">图片上传不限制比例。视频建议填写可公开访问的 MP4 地址，避免浏览器本地存储超限。</p>
 
         <div class="field-grid">
           <div class="field">
@@ -477,8 +477,6 @@
     }
 
     function isValidManagedContent(content) {
-      const isOfferImage = content?.channel === 'offers' && content.mediaType === 'image';
-      const hasOfferRatio = Math.abs(Number(content?.aspectRatio) - 16 / 9) <= .03;
       return Boolean(
         content
         && typeof content.id === 'string'
@@ -488,21 +486,11 @@
         && ['image', 'video'].includes(content.mediaType)
         && typeof content.source === 'string'
         && content.source.trim()
-        && (!isOfferImage || hasOfferRatio)
       );
     }
 
     function saveContent(content) {
       localStorage.setItem(CONTENT_STORAGE_KEY, JSON.stringify(content));
-    }
-
-    function getImageAspectRatio(source) {
-      return new Promise((resolve, reject) => {
-        const image = new Image();
-        image.addEventListener('load', () => resolve(image.naturalWidth / image.naturalHeight), { once: true });
-        image.addEventListener('error', () => reject(), { once: true });
-        image.src = source;
-      });
     }
 
     function showNotice(message) {
@@ -634,7 +622,7 @@
       });
     });
 
-    form.addEventListener('submit', async event => {
+    form.addEventListener('submit', event => {
       event.preventDefault();
       const data = new FormData(form);
       const title = String(data.get('title') || '').trim();
@@ -647,20 +635,6 @@
         return;
       }
 
-      let aspectRatio;
-      if (channel === 'offers' && type === 'image') {
-        try {
-          aspectRatio = await getImageAspectRatio(source);
-        } catch {
-          showNotice('无法读取 Offer 图片尺寸，请检查图片地址或重新上传。');
-          return;
-        }
-        if (Math.abs(aspectRatio - 16 / 9) > .03) {
-          showNotice('Offer 捷报仅支持 16:9 图片，请更换后再保存。');
-          return;
-        }
-      }
-
       const content = readContent();
       content.push({
         id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -670,7 +644,6 @@
         description: String(data.get('description') || '').trim(),
         mediaType: type,
         source,
-        ...(aspectRatio ? { aspectRatio } : {}),
         createdAt: new Date().toISOString()
       });
 

@@ -408,8 +408,6 @@
     const managedChannels = new Set(['works', 'offers', 'interviews', 'moments']);
 
     function isValidManagedContent(content) {
-      const isOfferImage = content?.channel === 'offers' && content.mediaType === 'image';
-      const hasOfferRatio = Math.abs(Number(content?.aspectRatio) - 16 / 9) <= .03;
       return Boolean(
         content
         && typeof content.id === 'string'
@@ -419,7 +417,6 @@
         && ['image', 'video'].includes(content.mediaType)
         && typeof content.source === 'string'
         && content.source.trim()
-        && (!isOfferImage || hasOfferRatio)
       );
     }
 
