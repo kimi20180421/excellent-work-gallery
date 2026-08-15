@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080909">
-  <title>像素100&奇点同行 · 优秀作业展</title>
+  <title>像素100&amp;奇点同行 · 优秀作业展</title>
   <style>
     :root {
       color-scheme: dark;
@@ -86,22 +86,130 @@
       color: var(--cyan);
     }
 
-    .carousel {
-      position: relative;
+    .gallery {
       width: 100vw;
       height: 100svh;
       min-height: 520px;
+      padding: clamp(70px, 9vh, 92px) clamp(14px, 2vw, 30px) clamp(14px, 2vw, 28px);
       overflow: hidden;
-      touch-action: pan-y;
-      user-select: none;
       background:
-        radial-gradient(circle at 50% 44%, rgba(49, 89, 217, .08), transparent 42%),
+        radial-gradient(circle at 30% 35%, rgba(42, 84, 196, .07), transparent 40%),
         var(--black);
     }
 
-    .slides {
+    .gallery-grid {
+      width: min(100%, 1680px);
+      height: 100%;
+      margin-inline: auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(280px, .72fr);
+      gap: clamp(10px, 1.2vw, 18px);
+    }
+
+    .left-column {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: clamp(10px, 1.2vw, 18px);
+    }
+
+    .channel-panel {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      border: 1px solid rgba(244, 247, 248, .11);
+      border-radius: 8px;
+      background: #0d1011;
+      box-shadow: 0 20px 70px rgba(0, 0, 0, .22);
+      outline: none;
+    }
+
+    .channel-panel:focus-visible {
+      border-color: rgba(99, 216, 232, .72);
+    }
+
+    .panel-head {
       position: absolute;
-      inset: 0;
+      inset: 0 0 auto;
+      z-index: 8;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px 0 14px;
+      border-bottom: 1px solid rgba(244, 247, 248, .08);
+      background: #0d1011;
+    }
+
+    .panel-title {
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .panel-count {
+      margin-left: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .panel-controls {
+      margin-left: auto;
+      display: flex;
+      gap: 3px;
+    }
+
+    .panel-control {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 6px;
+      color: rgba(244, 247, 248, .72);
+      background: transparent;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      transition: color 240ms ease, background 240ms ease;
+    }
+
+    .panel-control:hover,
+    .panel-control:focus-visible {
+      color: var(--white);
+      background: rgba(244, 247, 248, .09);
+      outline: none;
+    }
+
+    .panel-meter {
+      position: absolute;
+      inset: auto 0 0;
+      height: 2px;
+      overflow: hidden;
+      background: rgba(244, 247, 248, .08);
+    }
+
+    .panel-meter::after {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: var(--cyan);
+      transform: scaleX(0);
+      transform-origin: left center;
+    }
+
+    .channel-panel[data-playing="true"] .panel-meter::after {
+      animation: progress var(--autoplay) linear forwards;
+    }
+
+    .panel-stage {
+      position: absolute;
+      inset: 42px 0 0;
+      overflow: hidden;
+      touch-action: pan-y;
+      user-select: none;
     }
 
     .slide {
@@ -110,24 +218,22 @@
       display: grid;
       place-items: center;
       margin: 0;
-      padding: clamp(76px, 10vh, 108px) clamp(18px, 6vw, 96px) clamp(78px, 9vh, 104px);
+      padding: clamp(8px, 1vw, 14px);
       opacity: 0;
       visibility: hidden;
-      transform: translate3d(10%, 0, 0) scale(.985);
+      transform: translate3d(5%, 0, 0) scale(.99);
       transition:
         transform var(--duration) var(--ease),
-        opacity 420ms ease,
+        opacity 360ms ease,
         visibility 0s linear var(--duration);
-      will-change: transform, opacity;
       pointer-events: none;
     }
 
     .slide[data-state="before"] {
-      transform: translate3d(-10%, 0, 0) scale(.985);
+      transform: translate3d(-5%, 0, 0) scale(.99);
     }
 
-    .slide[data-state="active"],
-    .slide[data-state="active-secondary"] {
+    .slide[data-state="active"] {
       z-index: 2;
       opacity: 1;
       visibility: visible;
@@ -137,154 +243,62 @@
     }
 
     .artwork {
-      position: relative;
-      width: min(94vw, 1680px, calc((100svh - 210px) * 16 / 9));
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .artwork img,
     .artwork video {
       width: 100%;
-      height: auto;
-      aspect-ratio: 16 / 9;
+      height: 100%;
+      min-height: 0;
       display: block;
       object-fit: contain;
       object-position: center;
-      overflow: hidden;
-      border-radius: var(--radius);
-      background: #101314;
-      box-shadow: 0 28px 90px rgba(0, 0, 0, .48);
+      border-radius: 12px;
+      background: #080909;
+      box-shadow: 0 18px 54px rgba(0, 0, 0, .32);
     }
 
     .caption {
+      flex: 0 0 24px;
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+      padding-inline: 2px;
+      color: rgba(244, 247, 248, .72);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .channel-panel[data-channel="moments"] .caption,
+    .channel-panel[data-channel="offers"] .caption {
       display: none;
     }
 
-    .carousel[data-channel="works"] .caption {
-      display: flex;
-      align-items: center;
-      padding: clamp(10px, 1.1vw, 16px) 2px 0;
-      color: rgba(244, 247, 248, .78);
-      font-size: clamp(13px, 1vw, 15px);
-      font-weight: 500;
-    }
-
-    .carousel[data-channel="offers"] .artwork img,
-    .carousel[data-channel="offers"] .artwork video {
-      aspect-ratio: 9 / 16;
+    .channel-panel[data-channel="offers"] .artwork img,
+    .channel-panel[data-channel="offers"] .artwork video {
       background: transparent;
     }
 
-    .carousel[data-channel="offers"] .artwork {
-      width: min(94vw, 640px, calc((100svh - 210px) * 9 / 16));
-    }
-
-    .carousel-guide {
-      position: fixed;
-      left: 50%;
-      bottom: clamp(76px, 9vh, 100px);
-      z-index: 20;
-      width: min(62vw, 360px);
-      display: grid;
-      grid-template-columns: repeat(var(--guide-count, 8), 1fr);
-      gap: clamp(5px, .65vw, 9px);
-      transform: translateX(-50%);
-    }
-
-    .channel-nav {
-      position: fixed;
-      left: 50%;
-      bottom: clamp(18px, 2.5vh, 30px);
-      z-index: 20;
-      display: flex;
-      max-width: calc(100vw - 36px);
-      gap: 5px;
-      padding: 5px;
-      overflow-x: auto;
-      border: 1px solid rgba(244, 247, 248, .14);
-      border-radius: 999px;
-      background: rgba(8, 9, 9, .72);
-      transform: translateX(-50%);
-      scrollbar-width: none;
-    }
-
-    .channel-nav::-webkit-scrollbar { display: none; }
-
-    .channel-item {
-      flex: 0 0 auto;
-      padding: 9px 13px;
-      border: 0;
-      border-radius: 999px;
-      color: var(--muted);
-      background: transparent;
-      font-size: clamp(12px, 1vw, 14px);
-      font-weight: 500;
-      cursor: pointer;
-      transition: color 240ms ease, background 240ms ease;
-    }
-
-    .channel-item[aria-current="true"] {
-      color: var(--white);
-      background: rgba(99, 216, 232, .16);
-    }
-
-    .channel-item:focus-visible {
-      outline: 2px solid var(--cyan);
-      outline-offset: 2px;
-    }
-
-    .guide-item {
-      position: relative;
-      height: 18px;
-      padding: 0;
-      border: 0;
-      background: transparent;
-      cursor: pointer;
-    }
-
-    .guide-item[hidden] { display: none; }
-
-    .carousel[data-per-view="2"] .slide[data-state="active"] {
-      inset: 0 0 50%;
-      padding: clamp(68px, 7vh, 82px) clamp(18px, 5vw, 80px) 8px;
-    }
-
-    .carousel[data-per-view="2"] .slide[data-state="active-secondary"] {
-      inset: 50% 0 0;
-      padding: 8px clamp(18px, 5vw, 80px) clamp(62px, 7vh, 76px);
-    }
-
-    .carousel[data-per-view="2"] .artwork {
-      width: min(92vw, 1280px, calc((50svh - 118px) * 16 / 9));
-    }
-
-    .guide-item::before,
-    .guide-item::after {
-      content: "";
+    .panel-empty {
       position: absolute;
-      inset: 8px 0 auto;
-      height: 2px;
-      border-radius: 99px;
+      inset: 42px 0 0;
+      display: none;
+      place-items: center;
+      color: var(--muted);
+      font-size: 13px;
     }
 
-    .guide-item::before { background: rgba(255, 255, 255, .2); }
-
-    .guide-item::after {
-      background: var(--cyan);
-      transform: scaleX(0);
-      transform-origin: left center;
+    .channel-panel[data-empty="true"] .panel-empty {
+      display: grid;
     }
 
-    .guide-item[aria-current="true"]::before { background: rgba(255, 255, 255, .34); }
-
-    .guide-item[aria-current="true"]::after {
-      animation: progress var(--autoplay) linear forwards;
-    }
-
-    .guide-item:focus-visible {
-      outline: 2px solid var(--cyan);
-      outline-offset: 4px;
-      border-radius: 4px;
-    }
+    .slide-source { display: none; }
 
     .sr-only {
       position: absolute;
@@ -302,21 +316,45 @@
       to { transform: scaleX(1); }
     }
 
-    @media (max-width: 680px) {
+    @media (max-width: 820px) {
+      html,
+      body {
+        overflow: auto;
+      }
+
+      .gallery {
+        height: auto;
+        min-height: 100svh;
+        overflow: visible;
+        padding: 70px 12px 18px;
+      }
+
+      .gallery-grid {
+        height: auto;
+        grid-template-columns: 1fr;
+      }
+
+      .left-column {
+        grid-template-rows: none;
+      }
+
+      .channel-panel {
+        min-height: min(62vw, 410px);
+      }
+
+      .channel-panel[data-channel="offers"] {
+        min-height: min(150vw, 760px);
+      }
+    }
+
+    @media (max-width: 560px) {
       .site-header { height: 64px; }
       .brand { gap: 8px; }
       .brand-suffix { display: none; }
-      .slide { padding: 72px 12px 82px; }
-      .artwork {
-        width: min(calc(100vw - 24px), calc((100svh - 190px) * 16 / 9));
-      }
-      .carousel[data-channel="offers"] .artwork {
-        width: min(calc(100vw - 24px), calc((100svh - 190px) * 9 / 16));
-      }
-      .artwork img { border-radius: 16px; }
-      .carousel-guide { width: calc(100vw - 36px); gap: 4px; bottom: 76px; }
-      .channel-nav { width: calc(100vw - 24px); justify-content: flex-start; }
-      .channel-item { padding: 8px 11px; }
+      .channel-panel { min-height: 260px; }
+      .channel-panel[data-channel="offers"] { min-height: 620px; }
+      .panel-head { height: 40px; }
+      .panel-stage { inset-block-start: 40px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -324,7 +362,7 @@
         transition-duration: 1ms !important;
         transform: none !important;
       }
-      .guide-item[aria-current="true"]::after {
+      .channel-panel[data-playing="true"] .panel-meter::after {
         animation: none;
         transform: scaleX(1);
       }
@@ -332,89 +370,124 @@
   </style>
 </head>
 <body>
-  <header class="site-header">
+  <div class="site-header">
     <a class="brand" href="#slide-1" aria-label="像素100与奇点同行优秀作业展">
       <img class="brand-logo" src="assets/brand-logo.png" alt="像素100&奇点同行 logo">
       <span>像素100&amp;奇点同行</span>
       <span class="brand-suffix">· 优秀作业展</span>
     </a>
     <a class="admin-link" href="admin.html">内容后台</a>
-  </header>
+  </div>
 
-  <main class="carousel" aria-label="优秀学生作业轮播" tabindex="0">
-    <div class="slides">
-      <figure class="slide" id="slide-1" data-state="active">
-        <div class="artwork"><img src="assets/li-haomin-01.webp" alt="黎浩民的优秀作业：视觉语言形状分析" fetchpriority="high"><figcaption class="caption"><span class="student">作者：黎浩民</span></figcaption></div>
-      </figure>
-      <figure class="slide" id="slide-2" data-state="after">
-        <div class="artwork"><img src="assets/li-haomin-02.webp" alt="黎浩民的优秀作业：视觉语言质感分析"><figcaption class="caption"><span class="student">作者：黎浩民</span></figcaption></div>
-      </figure>
-      <figure class="slide" id="slide-3" data-state="after">
-        <div class="artwork"><img src="assets/chen-jingyun-01.webp" alt="陈静芸的优秀作业：根据用户选择路径重构页面结构"><figcaption class="caption"><span class="student">作者：陈静芸</span></figcaption></div>
-      </figure>
-      <figure class="slide" id="slide-4" data-state="after">
-        <div class="artwork"><img src="assets/lu-ruoxi-01.webp" alt="卢若溪的优秀作业：围绕交易链路开展半结构式访谈"><figcaption class="caption"><span class="student">作者：卢若溪</span></figcaption></div>
-      </figure>
-      <figure class="slide" id="slide-5" data-state="after">
-        <div class="artwork"><img src="assets/an-bingjun-01.webp" alt="安炳均的优秀作业：生活服务图标设计"><figcaption class="caption"><span class="student">作者：安炳均</span></figcaption></div>
-      </figure>
-      <figure class="slide" id="slide-6" data-state="after">
-        <div class="artwork"><img src="assets/zhao-yiyi-01.webp" alt="赵一仪的优秀作业：IP卡牌主视觉设计"><figcaption class="caption"><span class="student">作者：赵一仪</span></figcaption></div>
-      </figure>
-      <figure class="slide" id="slide-7" data-state="after">
-        <div class="artwork"><img src="assets/ma-bingrui-01.webp" alt="马冰蕊的优秀作业：影视内容筛选体验优化"><figcaption class="caption"><span class="student">作者：马冰蕊</span></figcaption></div>
-      </figure>
-      <figure class="slide" id="slide-8" data-state="after">
-        <div class="artwork"><img src="assets/li-yijun-01.webp" alt="李祎珺的优秀作业：美团拼好饭首页体验优化"><figcaption class="caption"><span class="student">作者：李祎珺</span></figcaption></div>
-      </figure>
-      <figure class="slide" id="slide-9" data-state="after">
-        <div class="artwork"><img src="assets/ma-bingrui-02.webp" alt="马冰蕊的优秀作业：微博暑假主题活动视觉设计"><figcaption class="caption"><span class="student">作者：马冰蕊</span></figcaption></div>
-      </figure>
-      <figure class="slide" id="slide-10" data-state="after">
-        <div class="artwork"><img src="assets/mbr.png" alt="马冰蕊的优秀作业：模块化设计"><figcaption class="caption"><span class="student">作者：马冰蕊</span></figcaption></div>
-      </figure>
-      <figure class="slide" id="slide-11" data-state="after">
-        <div class="artwork"><img src="assets/CHENJINGYUN.png" alt="陈静芸的优秀作业：QQ招兽闹新春主页面展示"><figcaption class="caption"><span class="student">作者：陈静芸</span></figcaption></div>
-      </figure>
-      <figure class="slide" id="slide-12" data-state="after">
-        <div class="artwork"><img src="assets/chen.png" alt="陈静芸的优秀作业：QQ招兽闹新春分享海报"><figcaption class="caption"><span class="student">作者：陈静芸</span></figcaption></div>
-      </figure>
+  <div class="gallery">
+    <div class="gallery-grid">
+      <div class="left-column">
+        <div class="channel-panel" data-channel="works" tabindex="0">
+          <div class="panel-head">
+            <span class="panel-title">优秀作业</span>
+            <span class="panel-count">0 / 0</span>
+            <div class="panel-controls">
+              <button class="panel-control" type="button" data-direction="-1" aria-label="上一张优秀作业">‹</button>
+              <button class="panel-control" type="button" data-direction="1" aria-label="下一张优秀作业">›</button>
+            </div>
+            <div class="panel-meter"></div>
+          </div>
+          <div class="panel-stage"></div>
+          <div class="panel-empty">暂未录入优秀作业</div>
+        </div>
+
+        <div class="channel-panel" data-channel="moments" tabindex="0">
+          <div class="panel-head">
+            <span class="panel-title">集训日常</span>
+            <span class="panel-count">0 / 0</span>
+            <div class="panel-controls">
+              <button class="panel-control" type="button" data-direction="-1" aria-label="上一个集训日常">‹</button>
+              <button class="panel-control" type="button" data-direction="1" aria-label="下一个集训日常">›</button>
+            </div>
+            <div class="panel-meter"></div>
+          </div>
+          <div class="panel-stage"></div>
+          <div class="panel-empty">暂未录入集训日常</div>
+        </div>
+      </div>
+
+      <div class="channel-panel" data-channel="offers" tabindex="0">
+        <div class="panel-head">
+          <span class="panel-title">Offer 捷报</span>
+          <span class="panel-count">0 / 0</span>
+          <div class="panel-controls">
+            <button class="panel-control" type="button" data-direction="-1" aria-label="上一张 Offer">‹</button>
+            <button class="panel-control" type="button" data-direction="1" aria-label="下一张 Offer">›</button>
+          </div>
+          <div class="panel-meter"></div>
+        </div>
+        <div class="panel-stage"></div>
+        <div class="panel-empty">暂未录入 Offer 捷报</div>
+      </div>
     </div>
 
-    <nav class="carousel-guide" aria-label="轮播指引">
-      <button class="guide-item" type="button" data-index="0" aria-current="true"><span class="sr-only">查看第 1 张作品</span></button>
-      <button class="guide-item" type="button" data-index="1" aria-current="false"><span class="sr-only">查看第 2 张作品</span></button>
-      <button class="guide-item" type="button" data-index="2" aria-current="false"><span class="sr-only">查看第 3 张作品</span></button>
-      <button class="guide-item" type="button" data-index="3" aria-current="false"><span class="sr-only">查看第 4 张作品</span></button>
-      <button class="guide-item" type="button" data-index="4" aria-current="false"><span class="sr-only">查看第 5 张作品</span></button>
-      <button class="guide-item" type="button" data-index="5" aria-current="false"><span class="sr-only">查看第 6 张作品</span></button>
-      <button class="guide-item" type="button" data-index="6" aria-current="false"><span class="sr-only">查看第 7 张作品</span></button>
-      <button class="guide-item" type="button" data-index="7" aria-current="false"><span class="sr-only">查看第 8 张作品</span></button>
-      <button class="guide-item" type="button" data-index="8" aria-current="false"><span class="sr-only">查看第 9 张作品</span></button>
-      <button class="guide-item" type="button" data-index="9" aria-current="false"><span class="sr-only">查看第 10 张作品</span></button>
-      <button class="guide-item" type="button" data-index="10" aria-current="false"><span class="sr-only">查看第 11 张作品</span></button>
-      <button class="guide-item" type="button" data-index="11" aria-current="false"><span class="sr-only">查看第 12 张作品</span></button>
-    </nav>
-    <nav class="channel-nav" aria-label="内容频道">
-      <button class="channel-item" type="button" data-channel="works" aria-current="true">优秀作业展</button>
-      <button class="channel-item" type="button" data-channel="offers" aria-current="false">Offer 捷报</button>
-      <button class="channel-item" type="button" data-channel="interviews" aria-current="false">面试间接龙</button>
-      <button class="channel-item" type="button" data-channel="moments" aria-current="false">集训日常</button>
-    </nav>
-    <p class="sr-only" aria-live="polite" id="carousel-status">正在展示优秀作业展第 1 项</p>
-  </main>
+    <div class="slide-source" id="slide-source">
+      <div class="slide" id="slide-1" data-state="active">
+        <div class="artwork"><img src="assets/li-haomin-01.webp" alt="黎浩民的优秀作业：视觉语言形状分析" fetchpriority="high"><div class="caption"><span class="student">作者：黎浩民</span></div></div>
+      </div>
+      <div class="slide" id="slide-2" data-state="after">
+        <div class="artwork"><img src="assets/li-haomin-02.webp" alt="黎浩民的优秀作业：视觉语言质感分析"><div class="caption"><span class="student">作者：黎浩民</span></div></div>
+      </div>
+      <div class="slide" id="slide-3" data-state="after">
+        <div class="artwork"><img src="assets/chen-jingyun-01.webp" alt="陈静芸的优秀作业：根据用户选择路径重构页面结构"><div class="caption"><span class="student">作者：陈静芸</span></div></div>
+      </div>
+      <div class="slide" id="slide-4" data-state="after">
+        <div class="artwork"><img src="assets/lu-ruoxi-01.webp" alt="卢若溪的优秀作业：围绕交易链路开展半结构式访谈"><div class="caption"><span class="student">作者：卢若溪</span></div></div>
+      </div>
+      <div class="slide" id="slide-5" data-state="after">
+        <div class="artwork"><img src="assets/an-bingjun-01.webp" alt="安炳均的优秀作业：生活服务图标设计"><div class="caption"><span class="student">作者：安炳均</span></div></div>
+      </div>
+      <div class="slide" id="slide-6" data-state="after">
+        <div class="artwork"><img src="assets/zhao-yiyi-01.webp" alt="赵一仪的优秀作业：IP卡牌主视觉设计"><div class="caption"><span class="student">作者：赵一仪</span></div></div>
+      </div>
+      <div class="slide" id="slide-7" data-state="after">
+        <div class="artwork"><img src="assets/ma-bingrui-01.webp" alt="马冰蕊的优秀作业：影视内容筛选体验优化"><div class="caption"><span class="student">作者：马冰蕊</span></div></div>
+      </div>
+      <div class="slide" id="slide-8" data-state="after">
+        <div class="artwork"><img src="assets/li-yijun-01.webp" alt="李祎珺的优秀作业：美团拼好饭首页体验优化"><div class="caption"><span class="student">作者：李祎珺</span></div></div>
+      </div>
+      <div class="slide" id="slide-9" data-state="after">
+        <div class="artwork"><img src="assets/ma-bingrui-02.webp" alt="马冰蕊的优秀作业：微博暑假主题活动视觉设计"><div class="caption"><span class="student">作者：马冰蕊</span></div></div>
+      </div>
+      <div class="slide" id="slide-10" data-state="after">
+        <div class="artwork"><img src="assets/mbr.png" alt="马冰蕊的优秀作业：模块化设计"><div class="caption"><span class="student">作者：马冰蕊</span></div></div>
+      </div>
+      <div class="slide" id="slide-11" data-state="after">
+        <div class="artwork"><img src="assets/CHENJINGYUN.png" alt="陈静芸的优秀作业：QQ招兽闹新春主页面展示"><div class="caption"><span class="student">作者：陈静芸</span></div></div>
+      </div>
+      <div class="slide" id="slide-12" data-state="after">
+        <div class="artwork"><img src="assets/chen.png" alt="陈静芸的优秀作业：QQ招兽闹新春分享海报"><div class="caption"><span class="student">作者：陈静芸</span></div></div>
+      </div>
+    </div>
+
+    <p class="sr-only" aria-live="polite" id="gallery-status"></p>
+  </div>
 
   <script src="media-storage.js"></script>
   <script>
     const CONTENT_STORAGE_KEY = 'pixel100-gallery-content-v1';
+    const AUTOPLAY_DELAY = 5600;
+    const channelNames = {
+      works: '优秀作业',
+      moments: '集训日常',
+      offers: 'Offer 捷报'
+    };
+    const managedChannels = new Set(Object.keys(channelNames));
+    const panelStates = new Map();
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let managedContent = [];
     try {
       managedContent = JSON.parse(localStorage.getItem(CONTENT_STORAGE_KEY) || '[]');
     } catch {
       managedContent = [];
     }
-    const slidesContainer = document.querySelector('.slides');
-    const managedChannels = new Set(['works', 'offers', 'interviews', 'moments']);
+    const slidesContainer = document.querySelector('#slide-source');
+    const status = document.querySelector('#gallery-status');
 
     function isValidManagedContent(content) {
       return Boolean(
@@ -430,7 +503,7 @@
     }
 
     function appendManagedContent(content, index) {
-      const slide = document.createElement('figure');
+      const slide = document.createElement('div');
       const channel = content.channel;
       const title = content.title.trim();
       const author = content.author || '像素100&奇点同行';
@@ -449,25 +522,14 @@
         media.controls = true;
         media.playsInline = true;
         media.muted = channel === 'moments';
-        media.addEventListener('ended', () => {
-          const isCurrentMoment = currentChannel === 'moments'
-            && channel === 'moments'
-            && (slide.dataset.state === 'active' || slide.dataset.state === 'active-secondary');
-          if (isCurrentMoment) advancePage();
-        });
+        media.autoplay = channel === 'moments';
       } else {
         media.loading = 'lazy';
       }
       MediaStore.resolve(content.source)
         .then(source => {
           media.src = source;
-          if (
-            content.mediaType === 'video'
-            && channel === 'moments'
-            && (slide.dataset.state === 'active' || slide.dataset.state === 'active-secondary')
-          ) {
-            media.play().catch(() => {});
-          }
+          if (panelStates.has(channel)) refreshPanel(channel);
         })
         .catch(() => {
           media.removeAttribute('src');
@@ -477,7 +539,7 @@
       artwork.className = 'artwork';
       artwork.append(media);
       if (channel === 'works' && content.author?.trim()) {
-        const caption = document.createElement('figcaption');
+        const caption = document.createElement('div');
         const student = document.createElement('span');
         caption.className = 'caption';
         student.className = 'student';
@@ -494,243 +556,100 @@
       .filter(isValidManagedContent)
       .forEach(appendManagedContent);
 
-    const carousel = document.querySelector('.carousel');
-    const slides = [...document.querySelectorAll('.slide')];
-    const guide = document.querySelector('.carousel-guide');
-    let guideItems = [...document.querySelectorAll('.guide-item')];
-    const channelItems = [...document.querySelectorAll('.channel-item')];
-    const status = document.querySelector('#carousel-status');
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const AUTOPLAY_DELAY = 5600;
-    const TWO_UP_HEIGHT_RESERVE = 118;
-    const TWO_UP_MIN_ARTWORK_WIDTH = 400;
-    const TWO_UP_MIN_VIEWPORT_WIDTH = 700;
-    const channelOrder = ['works', 'offers', 'interviews', 'moments'];
-    let perView = 1;
-    let currentPage = 0;
-    let currentChannel = channelOrder[0];
-    let timer;
-    let pointerStartX = null;
-    let resizeFrame;
-
-    function channelSlides() {
-      return slides.filter(slide => (slide.dataset.channel || 'works') === currentChannel);
-    }
-
-    function pageCount() {
-      return Math.ceil(channelSlides().length / perView);
-    }
-
-    function shouldShowTwoUp() {
-      return !['offers', 'moments'].includes(currentChannel)
-        && channelSlides().length > 1
-        && fitsTwoWorks();
-    }
-
-    function updateGuide() {
-      const count = pageCount();
-      guide.hidden = count === 0;
-      while (guideItems.length < count) {
-        const item = document.createElement('button');
-        const label = document.createElement('span');
-        item.className = 'guide-item';
-        item.type = 'button';
-        item.setAttribute('aria-current', 'false');
-        label.className = 'sr-only';
-        item.append(label);
-        item.addEventListener('click', () => setPage(Number(item.dataset.index)));
-        guide.append(item);
-        guideItems.push(item);
-      }
-
-      guide.style.setProperty('--guide-count', count);
-
-      guideItems.forEach((item, index) => {
-        const visible = index < count;
-        item.hidden = !visible;
-        if (!visible) return;
-        item.dataset.index = index;
-        const label = perView === 2 ? `查看第 ${index + 1} 组作品` : `查看第 ${index + 1} 张作品`;
-        item.querySelector('.sr-only').textContent = label;
-      });
-    }
-
-    function updateChannelNav() {
-      channelItems.forEach(item => {
-        item.setAttribute('aria-current', String(item.dataset.channel === currentChannel));
-      });
-    }
-
-    function syncMomentVideos() {
-      slides.forEach(slide => {
-        const video = slide.querySelector('video');
-        if (!video) return;
-        const shouldPlay = currentChannel === 'moments'
-          && (slide.dataset.state === 'active' || slide.dataset.state === 'active-secondary');
-        if (!shouldPlay) {
-          video.pause();
-          return;
-        }
-        video.muted = true;
-        video.play().catch(() => {});
-      });
-    }
-
-    function setPage(nextPage, restart = true) {
-      const currentSlides = channelSlides();
-      const count = pageCount();
-      if (count === 0) {
-        clearTimeout(timer);
-        slides.forEach(slide => {
-          slide.dataset.state = 'after';
-          slide.setAttribute('aria-hidden', 'true');
-        });
-        guideItems.forEach(item => item.setAttribute('aria-current', 'false'));
-        syncMomentVideos();
-        const channelName = channelItems.find(item => item.dataset.channel === currentChannel).textContent;
-        status.textContent = `${channelName}暂未录入内容`;
-        return;
-      }
-      const normalized = (nextPage + count) % count;
-      if (normalized === currentPage && !restart) return;
-      const firstVisible = normalized * perView;
-      const secondVisible = perView === 2 && firstVisible + 1 < currentSlides.length ? firstVisible + 1 : -1;
-
-      slides.forEach(slide => {
-        const index = currentSlides.indexOf(slide);
-        const state = index === firstVisible
-          ? 'active'
-          : secondVisible >= 0 && index === secondVisible
-            ? 'active-secondary'
-            : index < firstVisible
-              ? 'before'
-              : 'after';
-        slide.dataset.state = state;
-        slide.setAttribute('aria-hidden', String(index !== firstVisible && index !== secondVisible));
-      });
-      syncMomentVideos();
-
-      guideItems.forEach((item, index) => {
-        item.setAttribute('aria-current', String(index === normalized));
-      });
-
-      currentPage = normalized;
-      const channelName = channelItems.find(item => item.dataset.channel === currentChannel).textContent;
-      if (secondVisible >= 0) {
-        status.textContent = `正在展示${channelName}第 ${firstVisible + 1} 至 ${secondVisible + 1} 项`;
+    const panels = [...document.querySelectorAll('.channel-panel')];
+    const panelByChannel = new Map(panels.map(panel => [panel.dataset.channel, panel]));
+    [...slidesContainer.querySelectorAll('.slide')].forEach(slide => {
+      const channel = slide.dataset.channel || 'works';
+      const panel = panelByChannel.get(channel);
+      if (panel) {
+        slide.dataset.channel = channel;
+        panel.querySelector('.panel-stage').append(slide);
       } else {
-        status.textContent = `正在展示${channelName}第 ${firstVisible + 1} 项`;
+        slide.remove();
       }
+    });
 
-      if (restart) startAutoplay();
-    }
+    function refreshPanel(channel) {
+      const state = panelStates.get(channel);
+      if (!state) return;
+      const { panel, slides } = state;
+      clearTimeout(state.timer);
+      panel.dataset.playing = 'false';
+      panel.dataset.empty = String(slides.length === 0);
 
-    function selectChannel(channel, restart = true, targetPage = 'first') {
-      currentChannel = channel;
-      currentPage = -1;
-      carousel.dataset.channel = channel;
-      perView = shouldShowTwoUp() ? 2 : 1;
-      carousel.dataset.perView = String(perView);
-      updateChannelNav();
-      updateGuide();
-      setPage(targetPage === 'last' ? pageCount() - 1 : 0, restart);
-    }
-
-    function nextPopulatedChannel(direction) {
-      const channelIndex = channelOrder.indexOf(currentChannel);
-      for (let offset = 1; offset <= channelOrder.length; offset += 1) {
-        const nextIndex = (channelIndex + direction * offset + channelOrder.length) % channelOrder.length;
-        const channel = channelOrder[nextIndex];
-        const hasContent = slides.some(slide => (slide.dataset.channel || 'works') === channel);
-        if (hasContent) return channel;
-      }
-      return null;
-    }
-
-    function advancePage(direction = 1) {
-      const count = pageCount();
-      const nextPage = currentPage + direction;
-      if (count > 0 && nextPage >= 0 && nextPage < count) {
-        setPage(nextPage);
+      if (!slides.length) {
+        panel.querySelector('.panel-count').textContent = '0 / 0';
         return;
       }
 
-      const nextChannel = nextPopulatedChannel(direction);
-      if (!nextChannel) return;
-      selectChannel(nextChannel, true, direction > 0 ? 'first' : 'last');
+      state.index = (state.index + slides.length) % slides.length;
+      slides.forEach((slide, index) => {
+        const isActive = index === state.index;
+        slide.dataset.state = isActive ? 'active' : index < state.index ? 'before' : 'after';
+        slide.setAttribute('aria-hidden', String(!isActive));
+        const video = slide.querySelector('video');
+        if (video && !isActive) video.pause();
+      });
+
+      panel.querySelector('.panel-count').textContent = `${state.index + 1} / ${slides.length}`;
+      status.textContent = `${channelNames[channel]}正在展示第 ${state.index + 1} 项`;
+
+      const activeVideo = slides[state.index].querySelector('video');
+      if (channel === 'moments' && activeVideo) {
+        activeVideo.muted = true;
+        activeVideo.onended = () => advancePanel(channel);
+        if (!document.hidden) activeVideo.play().catch(() => {});
+        return;
+      }
+
+      if (document.hidden || reducedMotion.matches || slides.length < 2) return;
+      void panel.offsetWidth;
+      panel.dataset.playing = 'true';
+      state.timer = setTimeout(() => advancePanel(channel), AUTOPLAY_DELAY);
     }
 
-    function fitsTwoWorks() {
-      const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
-      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
-      const widthAllowedByViewport = Math.min(viewportWidth * .92, 1280);
-      const imageHeightPerWork = Math.max(0, viewportHeight / 2 - TWO_UP_HEIGHT_RESERVE);
-      const proportionalArtworkWidth = Math.min(
-        widthAllowedByViewport,
-        imageHeightPerWork * 16 / 9
-      );
-
-      return viewportWidth >= TWO_UP_MIN_VIEWPORT_WIDTH
-        && proportionalArtworkWidth >= TWO_UP_MIN_ARTWORK_WIDTH;
+    function advancePanel(channel, direction = 1) {
+      const state = panelStates.get(channel);
+      if (!state?.slides.length) return;
+      state.index = (state.index + direction + state.slides.length) % state.slides.length;
+      refreshPanel(channel);
     }
 
-    function updateMode() {
-      const firstVisible = currentPage * perView;
-      perView = shouldShowTwoUp() ? 2 : 1;
-      carousel.dataset.perView = String(perView);
-      currentPage = Math.floor(firstVisible / perView);
-      updateGuide();
-      setPage(currentPage);
+    panels.forEach(panel => {
+      const channel = panel.dataset.channel;
+      const slides = [...panel.querySelectorAll('.slide')];
+      const state = { panel, slides, index: 0, timer: null, pointerStartX: null };
+      panelStates.set(channel, state);
+
+      panel.querySelectorAll('.panel-control').forEach(button => {
+        button.addEventListener('click', () => advancePanel(channel, Number(button.dataset.direction)));
+      });
+
+      panel.addEventListener('keydown', event => {
+        if (event.key === 'ArrowRight') advancePanel(channel);
+        if (event.key === 'ArrowLeft') advancePanel(channel, -1);
+      });
+
+      panel.addEventListener('pointerdown', event => {
+        state.pointerStartX = event.clientX;
+      });
+
+      panel.addEventListener('pointerup', event => {
+        if (state.pointerStartX === null) return;
+        const distance = event.clientX - state.pointerStartX;
+        state.pointerStartX = null;
+        if (Math.abs(distance) < 50) return;
+        advancePanel(channel, distance < 0 ? 1 : -1);
+      });
+    });
+
+    function refreshAllPanels() {
+      panelStates.forEach((_, channel) => refreshPanel(channel));
     }
 
-    function scheduleModeUpdate() {
-      cancelAnimationFrame(resizeFrame);
-      resizeFrame = requestAnimationFrame(updateMode);
-    }
-
-    function startAutoplay() {
-      clearTimeout(timer);
-      if (reducedMotion.matches || document.hidden || pageCount() === 0) return;
-      const activeMomentVideo = currentChannel === 'moments'
-        ? channelSlides()
-          .filter(slide => slide.dataset.state === 'active' || slide.dataset.state === 'active-secondary')
-          .map(slide => slide.querySelector('video'))
-          .find(Boolean)
-        : null;
-      if (activeMomentVideo && !activeMomentVideo.ended) return;
-      timer = setTimeout(() => advancePage(), AUTOPLAY_DELAY);
-    }
-
-    guideItems.forEach(item => {
-      item.addEventListener('click', () => setPage(Number(item.dataset.index)));
-    });
-
-    channelItems.forEach(item => {
-      item.addEventListener('click', () => selectChannel(item.dataset.channel));
-    });
-
-    carousel.addEventListener('keydown', event => {
-      if (event.key === 'ArrowRight') advancePage();
-      if (event.key === 'ArrowLeft') advancePage(-1);
-    });
-
-    carousel.addEventListener('pointerdown', event => {
-      pointerStartX = event.clientX;
-    });
-
-    carousel.addEventListener('pointerup', event => {
-      if (pointerStartX === null) return;
-      const distance = event.clientX - pointerStartX;
-      pointerStartX = null;
-      if (Math.abs(distance) < 50) return;
-      advancePage(distance < 0 ? 1 : -1);
-    });
-
-    document.addEventListener('visibilitychange', startAutoplay);
-    reducedMotion.addEventListener('change', startAutoplay);
-    window.addEventListener('resize', scheduleModeUpdate, { passive: true });
-    window.visualViewport?.addEventListener('resize', scheduleModeUpdate, { passive: true });
-    selectChannel(currentChannel);
+    document.addEventListener('visibilitychange', refreshAllPanels);
+    reducedMotion.addEventListener('change', refreshAllPanels);
+    refreshAllPanels();
   </script>
 </body>
 </html>
