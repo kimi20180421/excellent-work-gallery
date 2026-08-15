@@ -600,7 +600,7 @@
         const index = currentSlides.indexOf(slide);
         const state = index === firstVisible
           ? 'active'
-          : index === secondVisible
+          : secondVisible >= 0 && index === secondVisible
             ? 'active-secondary'
             : index < firstVisible
               ? 'before'
