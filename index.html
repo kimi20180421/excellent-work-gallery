@@ -159,6 +159,15 @@
       display: none;
     }
 
+    .carousel[data-channel="works"] .caption {
+      display: flex;
+      align-items: center;
+      padding: clamp(10px, 1.1vw, 16px) 2px 0;
+      color: rgba(244, 247, 248, .78);
+      font-size: clamp(13px, 1vw, 15px);
+      font-weight: 500;
+    }
+
     .carousel[data-channel="offers"] .artwork img,
     .carousel[data-channel="offers"] .artwork video {
       background: transparent;
@@ -228,48 +237,6 @@
     }
 
     .guide-item[hidden] { display: none; }
-
-    .category-slide {
-      background:
-        radial-gradient(circle at 28% 26%, rgba(99, 216, 232, .16), transparent 24%),
-        radial-gradient(circle at 72% 70%, rgba(49, 89, 217, .18), transparent 28%);
-    }
-
-    .category-message {
-      width: min(86vw, 760px);
-      padding: clamp(28px, 5vw, 64px);
-      border: 1px solid rgba(244, 247, 248, .16);
-      border-radius: var(--radius);
-      background: rgba(16, 19, 20, .68);
-    }
-
-    .category-label,
-    .category-title,
-    .category-copy {
-      display: block;
-    }
-
-    .category-label {
-      margin-bottom: 14px;
-      color: var(--cyan);
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: .16em;
-    }
-
-    .category-title {
-      font-size: clamp(32px, 5vw, 68px);
-      font-weight: 500;
-      letter-spacing: -.04em;
-    }
-
-    .category-copy {
-      max-width: 32em;
-      margin-top: 18px;
-      color: rgba(244, 247, 248, .62);
-      font-size: clamp(15px, 1.35vw, 19px);
-      line-height: 1.75;
-    }
 
     .carousel[data-per-view="2"] .slide[data-state="active"] {
       inset: 0 0 50%;
@@ -404,15 +371,6 @@
       <figure class="slide" id="slide-12" data-state="after">
         <div class="artwork"><img src="assets/chen.png" alt="陈静芸的优秀作业：QQ招兽闹新春分享海报"><figcaption class="caption"><span class="student">作者：陈静芸</span></figcaption></div>
       </figure>
-      <figure class="slide category-slide" id="offer-news" data-channel="offers" data-state="after">
-        <div class="category-message"><span class="category-label">PIXEL 100 · CAREER NEWS</span><span class="category-title">Offer 捷报</span><span class="category-copy">记录每一份努力抵达的好消息。将 Offer 海报、入职喜报和成长故事放在这里。</span></div>
-      </figure>
-      <figure class="slide category-slide" id="interview-chain" data-channel="interviews" data-state="after">
-        <div class="category-message"><span class="category-label">PIXEL 100 · INTERVIEW NOTES</span><span class="category-title">面试间接龙</span><span class="category-copy">汇集面试复盘、经验传递与真题笔记，让下一位同学从前一位的经验继续出发。</span></div>
-      </figure>
-      <figure class="slide category-slide" id="easy-moments" data-channel="moments" data-state="after">
-        <div class="category-message"><span class="category-label">PIXEL 100 · EASY MOMENTS</span><span class="category-title">轻松一刻</span><span class="category-copy">留住学习间隙的放松时刻。后续可在这里加入课堂花絮、短视频和活动照片。</span></div>
-      </figure>
     </div>
 
     <nav class="carousel-guide" aria-label="轮播指引">
@@ -489,6 +447,15 @@
       const artwork = document.createElement('div');
       artwork.className = 'artwork';
       artwork.append(media);
+      if (channel === 'works' && content.author?.trim()) {
+        const caption = document.createElement('figcaption');
+        const student = document.createElement('span');
+        caption.className = 'caption';
+        student.className = 'student';
+        student.textContent = `作者：${content.author.trim()}`;
+        caption.append(student);
+        artwork.append(caption);
+      }
 
       slide.append(artwork);
       slidesContainer.append(slide);
@@ -533,6 +500,7 @@
 
     function updateGuide() {
       const count = pageCount();
+      guide.hidden = count === 0;
       while (guideItems.length < count) {
         const item = document.createElement('button');
         const label = document.createElement('span');
@@ -567,6 +535,17 @@
     function setPage(nextPage, restart = true) {
       const currentSlides = channelSlides();
       const count = pageCount();
+      if (count === 0) {
+        clearTimeout(timer);
+        slides.forEach(slide => {
+          slide.dataset.state = 'after';
+          slide.setAttribute('aria-hidden', 'true');
+        });
+        guideItems.forEach(item => item.setAttribute('aria-current', 'false'));
+        const channelName = channelItems.find(item => item.dataset.channel === currentChannel).textContent;
+        status.textContent = `${channelName}暂未录入内容`;
+        return;
+      }
       const normalized = (nextPage + count) % count;
       if (normalized === currentPage && !restart) return;
       const firstVisible = normalized * perView;
@@ -612,16 +591,24 @@
     }
 
     function advancePage(direction = 1) {
+      const count = pageCount();
+      if (count === 0) return;
       const nextPage = currentPage + direction;
-      if (nextPage >= 0 && nextPage < pageCount()) {
+      if (nextPage >= 0 && nextPage < count) {
         setPage(nextPage);
         return;
       }
 
       const channelIndex = channelOrder.indexOf(currentChannel);
-      const nextChannelIndex = (channelIndex + direction + channelOrder.length) % channelOrder.length;
-      selectChannel(channelOrder[nextChannelIndex], false);
-      setPage(direction > 0 ? 0 : pageCount() - 1);
+      for (let offset = 1; offset < channelOrder.length; offset += 1) {
+        const nextChannelIndex = (channelIndex + direction * offset + channelOrder.length) % channelOrder.length;
+        const nextChannel = channelOrder[nextChannelIndex];
+        if (!slides.some(slide => (slide.dataset.channel || 'works') === nextChannel)) continue;
+        selectChannel(nextChannel, false);
+        setPage(direction > 0 ? 0 : pageCount() - 1);
+        return;
+      }
+      setPage(direction > 0 ? 0 : count - 1);
     }
 
     function fitsTwoWorks() {
@@ -654,7 +641,7 @@
 
     function startAutoplay() {
       clearTimeout(timer);
-      if (reducedMotion.matches || document.hidden) return;
+      if (reducedMotion.matches || document.hidden || pageCount() === 0) return;
       timer = setTimeout(() => advancePage(), AUTOPLAY_DELAY);
     }
 
