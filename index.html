@@ -156,16 +156,7 @@
     }
 
     .caption {
-      display: flex;
-      align-items: center;
-      padding: clamp(12px, 1.3vw, 18px) 2px 0;
-      color: rgba(244, 247, 248, .78);
-    }
-
-    .student {
-      font-size: clamp(14px, 1.15vw, 18px);
-      font-weight: 500;
-      letter-spacing: .04em;
+      display: none;
     }
 
     .carousel-guide {
@@ -289,10 +280,6 @@
       width: min(92vw, 1280px, calc((50svh - 118px) * 16 / 9));
     }
 
-    .carousel[data-per-view="2"] .caption {
-      padding-top: 8px;
-    }
-
     .guide-item::before,
     .guide-item::after {
       content: "";
@@ -350,7 +337,6 @@
       .carousel-guide { width: calc(100vw - 36px); gap: 4px; bottom: 76px; }
       .channel-nav { width: calc(100vw - 24px); justify-content: flex-start; }
       .channel-item { padding: 8px 11px; }
-      .caption { padding: 12px 2px 0; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -444,7 +430,7 @@
       <button class="channel-item" type="button" data-channel="interviews" aria-current="false">面试间接龙</button>
       <button class="channel-item" type="button" data-channel="moments" aria-current="false">轻松一刻</button>
     </nav>
-    <p class="sr-only" aria-live="polite" id="carousel-status">正在展示第 1 张作品，作者：黎浩民</p>
+    <p class="sr-only" aria-live="polite" id="carousel-status">正在展示优秀作业展第 1 项</p>
   </main>
 
   <script>
@@ -487,13 +473,6 @@
       artwork.className = 'artwork';
       artwork.append(media);
 
-      const caption = document.createElement('figcaption');
-      caption.className = 'caption';
-      const student = document.createElement('span');
-      student.className = 'student';
-      student.textContent = `${content.title ? `${title} · ` : ''}作者：${author}`;
-      caption.append(student);
-      artwork.append(caption);
       slide.append(artwork);
       slidesContainer.append(slide);
     }
@@ -594,12 +573,11 @@
       });
 
       currentPage = normalized;
-      const firstName = currentSlides[firstVisible].querySelector('.student')?.textContent || channelItems.find(item => item.dataset.channel === currentChannel).textContent;
+      const channelName = channelItems.find(item => item.dataset.channel === currentChannel).textContent;
       if (secondVisible >= 0) {
-        const secondName = currentSlides[secondVisible].querySelector('.student')?.textContent || firstName;
-        status.textContent = `正在展示第 ${firstVisible + 1} 至 ${secondVisible + 1} 张作品，${firstName}、${secondName}`;
+        status.textContent = `正在展示${channelName}第 ${firstVisible + 1} 至 ${secondVisible + 1} 项`;
       } else {
-        status.textContent = `正在展示${channelItems.find(item => item.dataset.channel === currentChannel).textContent}：${firstName}`;
+        status.textContent = `正在展示${channelName}第 ${firstVisible + 1} 项`;
       }
 
       if (restart) startAutoplay();
