@@ -477,6 +477,8 @@
     }
 
     function isValidManagedContent(content) {
+      const isOfferImage = content?.channel === 'offers' && content.mediaType === 'image';
+      const hasOfferRatio = Math.abs(Number(content?.aspectRatio) - 16 / 9) <= .03;
       return Boolean(
         content
         && typeof content.id === 'string'
@@ -486,11 +488,21 @@
         && ['image', 'video'].includes(content.mediaType)
         && typeof content.source === 'string'
         && content.source.trim()
+        && (!isOfferImage || hasOfferRatio)
       );
     }
 
     function saveContent(content) {
       localStorage.setItem(CONTENT_STORAGE_KEY, JSON.stringify(content));
+    }
+
+    function getImageAspectRatio(source) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.addEventListener('load', () => resolve(image.naturalWidth / image.naturalHeight), { once: true });
+        image.addEventListener('error', () => reject(), { once: true });
+        image.src = source;
+      });
     }
 
     function showNotice(message) {
@@ -622,7 +634,7 @@
       });
     });
 
-    form.addEventListener('submit', event => {
+    form.addEventListener('submit', async event => {
       event.preventDefault();
       const data = new FormData(form);
       const title = String(data.get('title') || '').trim();
@@ -635,6 +647,20 @@
         return;
       }
 
+      let aspectRatio;
+      if (channel === 'offers' && type === 'image') {
+        try {
+          aspectRatio = await getImageAspectRatio(source);
+        } catch {
+          showNotice('无法读取 Offer 图片尺寸，请检查图片地址或重新上传。');
+          return;
+        }
+        if (Math.abs(aspectRatio - 16 / 9) > .03) {
+          showNotice('Offer 捷报仅支持 16:9 图片，请更换后再保存。');
+          return;
+        }
+      }
+
       const content = readContent();
       content.push({
         id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -644,6 +670,7 @@
         description: String(data.get('description') || '').trim(),
         mediaType: type,
         source,
+        ...(aspectRatio ? { aspectRatio } : {}),
         createdAt: new Date().toISOString()
       });
 
