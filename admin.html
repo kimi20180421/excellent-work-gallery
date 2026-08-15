@@ -445,6 +445,7 @@
 
   <div class="notice" id="notice" role="status" aria-live="polite"></div>
 
+  <script src="media-storage.js"></script>
   <script>
     const CONTENT_STORAGE_KEY = 'pixel100-gallery-content-v1';
     const channelNames = {
@@ -480,7 +481,8 @@
     const contentList = document.querySelector('#content-list');
     const stats = document.querySelector('#stats');
     const notice = document.querySelector('#notice');
-    let uploadedSource = '';
+    let uploadedFile = null;
+    let previewUrl = '';
     let noticeTimer;
     let activeChannel = 'works';
 
@@ -534,7 +536,7 @@
       });
     }
 
-    function renderList() {
+    async function renderList() {
       const content = [...builtinContent, ...readContent()];
       const channelContent = content.filter(entry => entry.channel === activeChannel);
       contentList.replaceChildren();
@@ -559,7 +561,13 @@
             ? document.createElement('video')
             : document.createElement('img');
           thumb.className = 'content-thumb';
-          thumb.src = entry.source;
+          MediaStore.resolve(entry.source)
+            .then(source => {
+              thumb.src = source;
+            })
+            .catch(() => {
+              thumb.removeAttribute('src');
+            });
           thumb.preload = 'metadata';
           thumb.muted = true;
 
@@ -585,9 +593,10 @@
             remove.className = 'delete-button';
             remove.type = 'button';
             remove.textContent = '删除';
-            remove.addEventListener('click', () => {
+            remove.addEventListener('click', async () => {
               const nextContent = readContent().filter(item => item.id !== entry.id);
               saveContent(nextContent);
+              await MediaStore.remove(entry.source);
               renderList();
               showNotice('内容已从本地内容库移除。');
             });
@@ -598,7 +607,9 @@
     }
 
     function resetPreview() {
-      uploadedSource = '';
+      uploadedFile = null;
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = '';
       imagePreview.removeAttribute('src');
       videoPreview.pause();
       videoPreview.removeAttribute('src');
@@ -634,20 +645,17 @@
         showNotice(`请选择${isVideo ? '视频' : '图片'}文件。`);
         return;
       }
-      const reader = new FileReader();
-      reader.addEventListener('load', () => {
-        uploadedSource = reader.result;
-        preview.classList.add('is-visible');
-        if (isVideo) {
-          videoPreview.src = uploadedSource;
-          videoPreview.classList.add('is-visible');
-        } else {
-          imagePreview.src = uploadedSource;
-          imagePreview.classList.add('is-visible');
-        }
-        sourceInput.value = '';
-      });
-      reader.readAsDataURL(file);
+      uploadedFile = file;
+      previewUrl = URL.createObjectURL(file);
+      preview.classList.add('is-visible');
+      if (isVideo) {
+        videoPreview.src = previewUrl;
+        videoPreview.classList.add('is-visible');
+      } else {
+        imagePreview.src = previewUrl;
+        imagePreview.classList.add('is-visible');
+      }
+      sourceInput.value = '';
     });
 
     form.addEventListener('reset', () => {
@@ -658,22 +666,33 @@
       });
     });
 
-    form.addEventListener('submit', event => {
+    form.addEventListener('submit', async event => {
       event.preventDefault();
       const data = new FormData(form);
       const title = String(data.get('title') || '').trim();
-      const source = uploadedSource || String(data.get('source') || '').trim();
+      const externalSource = String(data.get('source') || '').trim();
       const channel = String(data.get('channel'));
       const type = String(data.get('mediaType'));
 
-      if (!title || !source) {
+      if (!title || (!uploadedFile && !externalSource)) {
         showNotice('请填写标题，并填写媒体地址或上传媒体。');
         return;
       }
 
+      const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      let source = externalSource;
+      if (uploadedFile) {
+        try {
+          source = await MediaStore.put(id, uploadedFile);
+        } catch {
+          showNotice('媒体保存失败：浏览器磁盘空间不足或存储权限不可用。');
+          return;
+        }
+      }
+
       const content = readContent();
       content.push({
-        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        id,
         channel,
         title,
         author: String(data.get('author') || '').trim(),
@@ -686,7 +705,8 @@
       try {
         saveContent(content);
       } catch {
-        showNotice('保存失败：浏览器本地存储空间不足，请清理已有内容或改用公开媒体地址。');
+        await MediaStore.remove(source);
+        showNotice('内容索引保存失败，请刷新后台后重试。');
         return;
       }
 
@@ -696,8 +716,17 @@
       showNotice(`已加入「${channelNames[channel]}」，刷新前台即可播放。`);
     });
 
-    updateUploadField();
-    renderList();
+    async function initializeAdmin() {
+      try {
+        await MediaStore.migrateLocalStorage(CONTENT_STORAGE_KEY);
+      } catch {
+        showNotice('旧媒体迁移失败，已有内容仍可继续使用。');
+      }
+      updateUploadField();
+      renderList();
+    }
+
+    initializeAdmin();
   </script>
 </body>
 </html>

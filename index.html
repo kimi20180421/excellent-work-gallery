@@ -404,6 +404,7 @@
     <p class="sr-only" aria-live="polite" id="carousel-status">正在展示优秀作业展第 1 项</p>
   </main>
 
+  <script src="media-storage.js"></script>
   <script>
     const CONTENT_STORAGE_KEY = 'pixel100-gallery-content-v1';
     let managedContent = [];
@@ -442,7 +443,6 @@
       slide.dataset.channel = channel;
       slide.dataset.state = 'after';
 
-      media.src = content.source;
       media.alt = `${author}的内容：${title}`;
       media.preload = 'metadata';
       if (content.mediaType === 'video') {
@@ -452,6 +452,20 @@
       } else {
         media.loading = 'lazy';
       }
+      MediaStore.resolve(content.source)
+        .then(source => {
+          media.src = source;
+          if (
+            content.mediaType === 'video'
+            && channel === 'moments'
+            && (slide.dataset.state === 'active' || slide.dataset.state === 'active-secondary')
+          ) {
+            media.play().catch(() => {});
+          }
+        })
+        .catch(() => {
+          media.removeAttribute('src');
+        });
 
       const artwork = document.createElement('div');
       artwork.className = 'artwork';
