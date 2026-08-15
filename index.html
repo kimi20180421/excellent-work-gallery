@@ -449,6 +449,12 @@
         media.controls = true;
         media.playsInline = true;
         media.muted = channel === 'moments';
+        media.addEventListener('ended', () => {
+          const isCurrentMoment = currentChannel === 'moments'
+            && channel === 'moments'
+            && (slide.dataset.state === 'active' || slide.dataset.state === 'active-secondary');
+          if (isCurrentMoment) advancePage();
+        });
       } else {
         media.loading = 'lazy';
       }
@@ -499,7 +505,7 @@
     const TWO_UP_HEIGHT_RESERVE = 118;
     const TWO_UP_MIN_ARTWORK_WIDTH = 400;
     const TWO_UP_MIN_VIEWPORT_WIDTH = 700;
-    const channelOrder = channelItems.map(item => item.dataset.channel);
+    const channelOrder = ['works', 'offers', 'interviews', 'moments'];
     let perView = 1;
     let currentPage = 0;
     let currentChannel = channelOrder[0];
@@ -619,36 +625,39 @@
       if (restart) startAutoplay();
     }
 
-    function selectChannel(channel, restart = true) {
+    function selectChannel(channel, restart = true, targetPage = 'first') {
       currentChannel = channel;
-      currentPage = 0;
+      currentPage = -1;
       carousel.dataset.channel = channel;
       perView = shouldShowTwoUp() ? 2 : 1;
       carousel.dataset.perView = String(perView);
       updateChannelNav();
       updateGuide();
-      setPage(0, restart);
+      setPage(targetPage === 'last' ? pageCount() - 1 : 0, restart);
+    }
+
+    function nextPopulatedChannel(direction) {
+      const channelIndex = channelOrder.indexOf(currentChannel);
+      for (let offset = 1; offset <= channelOrder.length; offset += 1) {
+        const nextIndex = (channelIndex + direction * offset + channelOrder.length) % channelOrder.length;
+        const channel = channelOrder[nextIndex];
+        const hasContent = slides.some(slide => (slide.dataset.channel || 'works') === channel);
+        if (hasContent) return channel;
+      }
+      return null;
     }
 
     function advancePage(direction = 1) {
       const count = pageCount();
-      if (count === 0) return;
       const nextPage = currentPage + direction;
-      if (nextPage >= 0 && nextPage < count) {
+      if (count > 0 && nextPage >= 0 && nextPage < count) {
         setPage(nextPage);
         return;
       }
 
-      const channelIndex = channelOrder.indexOf(currentChannel);
-      for (let offset = 1; offset < channelOrder.length; offset += 1) {
-        const nextChannelIndex = (channelIndex + direction * offset + channelOrder.length) % channelOrder.length;
-        const nextChannel = channelOrder[nextChannelIndex];
-        if (!slides.some(slide => (slide.dataset.channel || 'works') === nextChannel)) continue;
-        selectChannel(nextChannel, false);
-        setPage(direction > 0 ? 0 : pageCount() - 1);
-        return;
-      }
-      setPage(direction > 0 ? 0 : count - 1);
+      const nextChannel = nextPopulatedChannel(direction);
+      if (!nextChannel) return;
+      selectChannel(nextChannel, true, direction > 0 ? 'first' : 'last');
     }
 
     function fitsTwoWorks() {
@@ -682,6 +691,13 @@
     function startAutoplay() {
       clearTimeout(timer);
       if (reducedMotion.matches || document.hidden || pageCount() === 0) return;
+      const activeMomentVideo = currentChannel === 'moments'
+        ? channelSlides()
+          .filter(slide => slide.dataset.state === 'active' || slide.dataset.state === 'active-secondary')
+          .map(slide => slide.querySelector('video'))
+          .find(Boolean)
+        : null;
+      if (activeMomentVideo && !activeMomentVideo.ended) return;
       timer = setTimeout(() => advancePage(), AUTOPLAY_DELAY);
     }
 
