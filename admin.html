@@ -177,10 +177,21 @@
       border-radius: 11px;
       background: var(--soft);
       aspect-ratio: 16 / 9;
-      object-fit: contain;
+      overflow: hidden;
     }
 
     .preview.is-visible { display: block; }
+
+    .preview img,
+    .preview video {
+      display: none;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .preview img.is-visible,
+    .preview video.is-visible { display: block; }
 
     .form-actions {
       justify-content: space-between;
@@ -363,7 +374,7 @@
     <section class="workspace">
       <form class="entry-panel" id="content-form">
         <h2>录入内容</h2>
-        <p class="panel-note">Offer 捷报建议使用 9:16 竖版图片，上传不限制比例。视频建议填写可公开访问的 MP4 地址，避免浏览器本地存储超限。</p>
+        <p class="panel-note">Offer 捷报建议使用 9:16 竖版图片。图片与短视频均可上传，视频超过 3MB 请填写可公开访问的 MP4 地址。</p>
 
         <div class="field-grid">
           <div class="field">
@@ -395,12 +406,12 @@
           </div>
 
           <div class="field">
-            <label for="media-url">媒体地址 <span class="optional">填写地址或上传图片二选一</span></label>
+            <label for="media-url">媒体地址 <span class="optional">填写地址或上传媒体二选一</span></label>
             <input id="media-url" name="source" type="url" placeholder="https://example.com/content.jpg 或 .mp4">
           </div>
 
           <div class="field" id="upload-field">
-            <label for="media-file">上传图片 <span class="optional">建议小于 2MB</span></label>
+            <label for="media-file" id="media-file-label">上传图片 <span class="optional">建议小于 2MB</span></label>
             <input id="media-file" type="file" accept="image/*">
           </div>
 
@@ -409,7 +420,10 @@
             <textarea id="description" name="description" maxlength="140" placeholder="用于后台识别与归档，不会覆盖前台作品图。"></textarea>
           </div>
 
-          <img class="preview" id="preview" alt="上传图片预览">
+          <div class="preview" id="preview">
+            <img id="image-preview" alt="上传图片预览">
+            <video id="video-preview" controls muted playsinline></video>
+          </div>
         </div>
 
         <div class="form-actions">
@@ -457,15 +471,20 @@
     const form = document.querySelector('#content-form');
     const sourceInput = document.querySelector('#media-url');
     const fileInput = document.querySelector('#media-file');
+    const fileLabel = document.querySelector('#media-file-label');
     const mediaType = document.querySelector('#media-type');
     const uploadField = document.querySelector('#upload-field');
     const preview = document.querySelector('#preview');
+    const imagePreview = document.querySelector('#image-preview');
+    const videoPreview = document.querySelector('#video-preview');
     const contentList = document.querySelector('#content-list');
     const stats = document.querySelector('#stats');
     const notice = document.querySelector('#notice');
     let uploadedSource = '';
     let noticeTimer;
     let activeChannel = 'works';
+    const MAX_IMAGE_UPLOAD_BYTES = 2 * 1024 * 1024;
+    const MAX_VIDEO_UPLOAD_BYTES = 3 * 1024 * 1024;
 
     function readContent() {
       try {
@@ -582,15 +601,26 @@
 
     function resetPreview() {
       uploadedSource = '';
-      preview.removeAttribute('src');
+      imagePreview.removeAttribute('src');
+      videoPreview.pause();
+      videoPreview.removeAttribute('src');
       preview.classList.remove('is-visible');
+      imagePreview.classList.remove('is-visible');
+      videoPreview.classList.remove('is-visible');
+    }
+
+    function updateUploadField() {
+      const isVideo = mediaType.value === 'video';
+      fileInput.accept = isVideo ? 'video/*' : 'image/*';
+      fileLabel.innerHTML = isVideo
+        ? '上传视频 <span class="optional">建议小于 3MB</span>'
+        : '上传图片 <span class="optional">建议小于 2MB</span>';
     }
 
     mediaType.addEventListener('change', () => {
-      const isVideo = mediaType.value === 'video';
-      uploadField.hidden = isVideo;
       fileInput.value = '';
       resetPreview();
+      updateUploadField();
     });
 
     fileInput.addEventListener('change', () => {
@@ -599,17 +629,31 @@
         resetPreview();
         return;
       }
-      if (file.size > 2 * 1024 * 1024) {
+      const isVideo = mediaType.value === 'video';
+      if (!file.type.startsWith(isVideo ? 'video/' : 'image/')) {
         fileInput.value = '';
         resetPreview();
-        showNotice('图片超过 2MB，建议压缩后再上传，避免本地内容库写入失败。');
+        showNotice(`请选择${isVideo ? '视频' : '图片'}文件。`);
+        return;
+      }
+      const sizeLimit = isVideo ? MAX_VIDEO_UPLOAD_BYTES : MAX_IMAGE_UPLOAD_BYTES;
+      if (file.size > sizeLimit) {
+        fileInput.value = '';
+        resetPreview();
+        showNotice(`${isVideo ? '视频' : '图片'}超过 ${isVideo ? '3MB' : '2MB'}，请压缩后上传或填写外部地址。`);
         return;
       }
       const reader = new FileReader();
       reader.addEventListener('load', () => {
         uploadedSource = reader.result;
-        preview.src = uploadedSource;
         preview.classList.add('is-visible');
+        if (isVideo) {
+          videoPreview.src = uploadedSource;
+          videoPreview.classList.add('is-visible');
+        } else {
+          imagePreview.src = uploadedSource;
+          imagePreview.classList.add('is-visible');
+        }
         sourceInput.value = '';
       });
       reader.readAsDataURL(file);
@@ -619,6 +663,7 @@
       requestAnimationFrame(() => {
         uploadField.hidden = false;
         resetPreview();
+        updateUploadField();
       });
     });
 
@@ -631,7 +676,7 @@
       const type = String(data.get('mediaType'));
 
       if (!title || !source) {
-        showNotice('请填写标题，并填写媒体地址或上传一张图片。');
+        showNotice('请填写标题，并填写媒体地址或上传媒体。');
         return;
       }
 
@@ -660,6 +705,7 @@
       showNotice(`已加入「${channelNames[channel]}」，刷新前台即可播放。`);
     });
 
+    updateUploadField();
     renderList();
   </script>
 </body>

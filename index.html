@@ -448,6 +448,7 @@
       if (content.mediaType === 'video') {
         media.controls = true;
         media.playsInline = true;
+        media.muted = channel === 'moments';
       } else {
         media.loading = 'lazy';
       }
@@ -540,6 +541,21 @@
       });
     }
 
+    function syncMomentVideos() {
+      slides.forEach(slide => {
+        const video = slide.querySelector('video');
+        if (!video) return;
+        const shouldPlay = currentChannel === 'moments'
+          && (slide.dataset.state === 'active' || slide.dataset.state === 'active-secondary');
+        if (!shouldPlay) {
+          video.pause();
+          return;
+        }
+        video.muted = true;
+        video.play().catch(() => {});
+      });
+    }
+
     function setPage(nextPage, restart = true) {
       const currentSlides = channelSlides();
       const count = pageCount();
@@ -550,6 +566,7 @@
           slide.setAttribute('aria-hidden', 'true');
         });
         guideItems.forEach(item => item.setAttribute('aria-current', 'false'));
+        syncMomentVideos();
         const channelName = channelItems.find(item => item.dataset.channel === currentChannel).textContent;
         status.textContent = `${channelName}暂未录入内容`;
         return;
@@ -571,6 +588,7 @@
         slide.dataset.state = state;
         slide.setAttribute('aria-hidden', String(index !== firstVisible && index !== secondVisible));
       });
+      syncMomentVideos();
 
       guideItems.forEach((item, index) => {
         item.setAttribute('aria-current', String(index === normalized));
