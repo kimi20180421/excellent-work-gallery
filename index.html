@@ -399,7 +399,7 @@
       <button class="channel-item" type="button" data-channel="works" aria-current="true">优秀作业展</button>
       <button class="channel-item" type="button" data-channel="offers" aria-current="false">Offer 捷报</button>
       <button class="channel-item" type="button" data-channel="interviews" aria-current="false">面试间接龙</button>
-      <button class="channel-item" type="button" data-channel="moments" aria-current="false">轻松一刻</button>
+      <button class="channel-item" type="button" data-channel="moments" aria-current="false">集训日常</button>
     </nav>
     <p class="sr-only" aria-live="polite" id="carousel-status">正在展示优秀作业展第 1 项</p>
   </main>
@@ -522,7 +522,7 @@
     }
 
     function shouldShowTwoUp() {
-      return currentChannel !== 'offers'
+      return !['offers', 'moments'].includes(currentChannel)
         && channelSlides().length > 1
         && fitsTwoWorks();
     }
