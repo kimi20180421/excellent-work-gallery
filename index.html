@@ -355,7 +355,7 @@
 </head>
 <body>
   <div class="site-header">
-    <a class="brand" href="#slide-1" aria-label="像素100与奇点同行优秀作业展">
+    <a class="brand" href="#gallery" aria-label="像素100与奇点同行优秀作业展">
       <img class="brand-logo" src="assets/brand-logo.png" alt="像素100&奇点同行 logo">
       <span>像素100&amp;奇点同行</span>
       <span class="brand-suffix">· 优秀作业展</span>
@@ -363,7 +363,7 @@
     <a class="admin-link" href="admin.html">内容后台</a>
   </div>
 
-  <div class="gallery">
+  <div class="gallery" id="gallery">
     <div class="gallery-grid">
       <div class="left-column">
         <div class="channel-panel" data-channel="works" tabindex="0">
@@ -407,48 +407,12 @@
       </div>
     </div>
 
-    <div class="slide-source" id="slide-source">
-      <div class="slide" id="slide-1" data-state="active">
-        <div class="artwork"><img src="assets/li-haomin-01.webp" alt="黎浩民的优秀作业：视觉语言形状分析" fetchpriority="high"><div class="caption"><span class="student">作者：黎浩民</span></div></div>
-      </div>
-      <div class="slide" id="slide-2" data-state="after">
-        <div class="artwork"><img src="assets/li-haomin-02.webp" alt="黎浩民的优秀作业：视觉语言质感分析"><div class="caption"><span class="student">作者：黎浩民</span></div></div>
-      </div>
-      <div class="slide" id="slide-3" data-state="after">
-        <div class="artwork"><img src="assets/chen-jingyun-01.webp" alt="陈静芸的优秀作业：根据用户选择路径重构页面结构"><div class="caption"><span class="student">作者：陈静芸</span></div></div>
-      </div>
-      <div class="slide" id="slide-4" data-state="after">
-        <div class="artwork"><img src="assets/lu-ruoxi-01.webp" alt="卢若溪的优秀作业：围绕交易链路开展半结构式访谈"><div class="caption"><span class="student">作者：卢若溪</span></div></div>
-      </div>
-      <div class="slide" id="slide-5" data-state="after">
-        <div class="artwork"><img src="assets/an-bingjun-01.webp" alt="安炳均的优秀作业：生活服务图标设计"><div class="caption"><span class="student">作者：安炳均</span></div></div>
-      </div>
-      <div class="slide" id="slide-6" data-state="after">
-        <div class="artwork"><img src="assets/zhao-yiyi-01.webp" alt="赵一仪的优秀作业：IP卡牌主视觉设计"><div class="caption"><span class="student">作者：赵一仪</span></div></div>
-      </div>
-      <div class="slide" id="slide-7" data-state="after">
-        <div class="artwork"><img src="assets/ma-bingrui-01.webp" alt="马冰蕊的优秀作业：影视内容筛选体验优化"><div class="caption"><span class="student">作者：马冰蕊</span></div></div>
-      </div>
-      <div class="slide" id="slide-8" data-state="after">
-        <div class="artwork"><img src="assets/li-yijun-01.webp" alt="李祎珺的优秀作业：美团拼好饭首页体验优化"><div class="caption"><span class="student">作者：李祎珺</span></div></div>
-      </div>
-      <div class="slide" id="slide-9" data-state="after">
-        <div class="artwork"><img src="assets/ma-bingrui-02.webp" alt="马冰蕊的优秀作业：微博暑假主题活动视觉设计"><div class="caption"><span class="student">作者：马冰蕊</span></div></div>
-      </div>
-      <div class="slide" id="slide-10" data-state="after">
-        <div class="artwork"><img src="assets/mbr.png" alt="马冰蕊的优秀作业：模块化设计"><div class="caption"><span class="student">作者：马冰蕊</span></div></div>
-      </div>
-      <div class="slide" id="slide-11" data-state="after">
-        <div class="artwork"><img src="assets/CHENJINGYUN.png" alt="陈静芸的优秀作业：QQ招兽闹新春主页面展示"><div class="caption"><span class="student">作者：陈静芸</span></div></div>
-      </div>
-      <div class="slide" id="slide-12" data-state="after">
-        <div class="artwork"><img src="assets/chen.png" alt="陈静芸的优秀作业：QQ招兽闹新春分享海报"><div class="caption"><span class="student">作者：陈静芸</span></div></div>
-      </div>
-    </div>
+    <div class="slide-source" id="slide-source"></div>
 
     <p class="sr-only" aria-live="polite" id="gallery-status"></p>
   </div>
 
+  <script src="gallery-content.js"></script>
   <script src="media-storage.js"></script>
   <script>
     const CONTENT_STORAGE_KEY = 'pixel100-gallery-content-v1';
@@ -461,6 +425,7 @@
     const managedChannels = new Set(Object.keys(channelNames));
     const panelStates = new Map();
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    GalleryContent.ensureBuiltins();
     let managedContent = [];
     try {
       managedContent = JSON.parse(localStorage.getItem(CONTENT_STORAGE_KEY) || '[]');
