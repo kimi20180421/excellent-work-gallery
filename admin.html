@@ -475,6 +475,20 @@
       interviews: '面试间接龙',
       moments: '轻松一刻'
     };
+    const builtinContent = [
+      { id: 'builtin-01', channel: 'works', title: '视觉语言形状分析', author: '黎浩民', source: 'assets/li-haomin-01.webp' },
+      { id: 'builtin-02', channel: 'works', title: '视觉语言质感分析', author: '黎浩民', source: 'assets/li-haomin-02.webp' },
+      { id: 'builtin-03', channel: 'works', title: '根据用户选择路径重构页面结构', author: '陈静芸', source: 'assets/chen-jingyun-01.webp' },
+      { id: 'builtin-04', channel: 'works', title: '围绕交易链路开展半结构式访谈', author: '卢若溪', source: 'assets/lu-ruoxi-01.webp' },
+      { id: 'builtin-05', channel: 'works', title: '生活服务图标设计', author: '安炳均', source: 'assets/an-bingjun-01.webp' },
+      { id: 'builtin-06', channel: 'works', title: 'IP卡牌主视觉设计', author: '赵一仪', source: 'assets/zhao-yiyi-01.webp' },
+      { id: 'builtin-07', channel: 'works', title: '影视内容筛选体验优化', author: '马冰蕊', source: 'assets/ma-bingrui-01.webp' },
+      { id: 'builtin-08', channel: 'works', title: '美团拼好饭首页体验优化', author: '李祎珺', source: 'assets/li-yijun-01.webp' },
+      { id: 'builtin-09', channel: 'works', title: '微博暑假主题活动视觉设计', author: '马冰蕊', source: 'assets/ma-bingrui-02.webp' },
+      { id: 'builtin-10', channel: 'works', title: '模块化设计', author: '马冰蕊', source: 'assets/mbr.png' },
+      { id: 'builtin-11', channel: 'works', title: 'QQ招兽闹新春主页面展示', author: '陈静芸', source: 'assets/CHENJINGYUN.png' },
+      { id: 'builtin-12', channel: 'works', title: 'QQ招兽闹新春分享海报', author: '陈静芸', source: 'assets/chen.png' }
+    ];
     const form = document.querySelector('#content-form');
     const sourceInput = document.querySelector('#media-url');
     const fileInput = document.querySelector('#media-file');
@@ -518,7 +532,7 @@
     }
 
     function renderList() {
-      const content = readContent();
+      const content = [...builtinContent, ...readContent()];
       contentList.replaceChildren();
       renderStats(content);
 
@@ -557,20 +571,24 @@
 
           const type = document.createElement('div');
           type.className = 'type-tag';
-          type.textContent = channelNames[entry.channel] || channelNames.works;
+          type.textContent = entry.id.startsWith('builtin-')
+            ? '网站内置'
+            : channelNames[entry.channel] || channelNames.works;
 
-          const remove = document.createElement('button');
-          remove.className = 'delete-button';
-          remove.type = 'button';
-          remove.textContent = '删除';
-          remove.addEventListener('click', () => {
-            const nextContent = readContent().filter(item => item.id !== entry.id);
-            saveContent(nextContent);
-            renderList();
-            showNotice('内容已从本地内容库移除。');
-          });
-
-          row.append(thumb, main, type, remove);
+          row.append(thumb, main, type);
+          if (!entry.id.startsWith('builtin-')) {
+            const remove = document.createElement('button');
+            remove.className = 'delete-button';
+            remove.type = 'button';
+            remove.textContent = '删除';
+            remove.addEventListener('click', () => {
+              const nextContent = readContent().filter(item => item.id !== entry.id);
+              saveContent(nextContent);
+              renderList();
+              showNotice('内容已从本地内容库移除。');
+            });
+            row.append(remove);
+          }
           contentList.append(row);
         });
     }
