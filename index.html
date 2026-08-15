@@ -529,6 +529,12 @@
       return Math.ceil(channelSlides().length / perView);
     }
 
+    function shouldShowTwoUp() {
+      return currentChannel !== 'offers'
+        && channelSlides().length > 1
+        && fitsTwoWorks();
+    }
+
     function updateGuide() {
       const count = pageCount();
       while (guideItems.length < count) {
@@ -603,7 +609,7 @@
       currentChannel = channel;
       currentPage = 0;
       carousel.dataset.channel = channel;
-      perView = channelSlides().length > 1 && fitsTwoWorks() ? 2 : 1;
+      perView = shouldShowTwoUp() ? 2 : 1;
       carousel.dataset.perView = String(perView);
       updateChannelNav();
       updateGuide();
@@ -639,7 +645,7 @@
 
     function updateMode() {
       const firstVisible = currentPage * perView;
-      perView = channelSlides().length > 1 && fitsTwoWorks() ? 2 : 1;
+      perView = shouldShowTwoUp() ? 2 : 1;
       carousel.dataset.perView = String(perView);
       currentPage = Math.floor(firstVisible / perView);
       updateGuide();
