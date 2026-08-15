@@ -3,18 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0c1113">
+  <meta name="theme-color" content="#f7f9f8">
   <title>内容后台 · 像素100&奇点同行</title>
   <style>
     :root {
-      --ink: #0c1113;
-      --paper: #edf2f1;
-      --panel: #141d1f;
-      --line: rgba(237, 242, 241, .14);
-      --muted: rgba(237, 242, 241, .58);
-      --cyan: #63d8e8;
+      --ink: #172224;
+      --paper: #f7f9f8;
+      --surface: #ffffff;
+      --soft: #f1f5f3;
+      --line: #dce5e1;
+      --muted: #6c7a77;
+      --cyan: #187b8b;
       --warm: #e7a36f;
-      --radius: 18px;
+      --radius: 14px;
       --ease: cubic-bezier(.16, 1, .3, 1);
     }
 
@@ -23,11 +24,11 @@
     body {
       min-width: 320px;
       margin: 0;
-      color: var(--paper);
+      color: var(--ink);
       background:
-        radial-gradient(circle at 92% 6%, rgba(99, 216, 232, .12), transparent 26rem),
-        radial-gradient(circle at 8% 100%, rgba(231, 163, 111, .1), transparent 25rem),
-        var(--ink);
+        radial-gradient(circle at 92% 0%, rgba(24, 123, 139, .06), transparent 24rem),
+        radial-gradient(circle at 4% 100%, rgba(231, 163, 111, .08), transparent 22rem),
+        var(--paper);
       font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       -webkit-font-smoothing: antialiased;
     }
@@ -40,11 +41,10 @@
     .shell {
       width: min(1440px, calc(100% - 40px));
       margin: 0 auto;
-      padding: 28px 0 56px;
+      padding: 24px 0 48px;
     }
 
     .topbar,
-    .headline,
     .workspace,
     .list-head,
     .content-row,
@@ -57,7 +57,7 @@
 
     .brand,
     .site-link {
-      color: var(--paper);
+      color: var(--ink);
       text-decoration: none;
     }
 
@@ -77,55 +77,28 @@
     .site-link:hover,
     .site-link:focus-visible { color: var(--cyan); }
 
-    .headline {
-      justify-content: space-between;
-      gap: 30px;
-      padding: clamp(56px, 10vh, 120px) 0 clamp(30px, 5vh, 54px);
-    }
-
-    .eyebrow {
-      margin: 0 0 14px;
-      color: var(--cyan);
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: .16em;
-    }
-
-    h1 {
-      max-width: 9em;
-      margin: 0;
-      font-size: clamp(38px, 6vw, 78px);
-      font-weight: 500;
-      letter-spacing: -.055em;
-      line-height: 1.03;
-    }
-
-    .headline-copy {
-      width: min(320px, 38vw);
-      margin: 0;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.8;
-    }
-
     .workspace {
       align-items: stretch;
       gap: 18px;
+      margin-top: 28px;
     }
 
     .entry-panel,
     .library-panel {
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      background: rgba(20, 29, 31, .76);
+      background: var(--surface);
+      box-shadow: 0 14px 36px rgba(28, 45, 40, .07);
     }
 
     .entry-panel {
-      width: min(440px, 38%);
+      order: 2;
+      width: min(430px, 36%);
       padding: clamp(22px, 3vw, 34px);
     }
 
     .library-panel {
+      order: 1;
       flex: 1;
       min-width: 0;
       padding: clamp(22px, 3vw, 34px);
@@ -150,7 +123,7 @@
     .field { display: grid; gap: 8px; }
 
     label {
-      color: rgba(237, 242, 241, .76);
+      color: #41504d;
       font-size: 13px;
       font-weight: 500;
     }
@@ -161,16 +134,16 @@
     select,
     textarea {
       width: 100%;
-      border: 1px solid rgba(237, 242, 241, .16);
+      border: 1px solid var(--line);
       border-radius: 10px;
       outline: 0;
-      color: var(--paper);
-      background: rgba(4, 8, 9, .36);
+      color: var(--ink);
+      background: #fff;
       padding: 12px 13px;
       transition: border-color .24s ease, background .24s ease;
     }
 
-    select option { color: var(--ink); }
+    select option { color: var(--ink); background: #fff; }
 
     textarea {
       min-height: 76px;
@@ -181,7 +154,7 @@
     select:focus,
     textarea:focus {
       border-color: var(--cyan);
-      background: rgba(4, 8, 9, .56);
+      background: #fff;
     }
 
     input[type="file"] {
@@ -202,7 +175,7 @@
       width: 100%;
       margin-top: 4px;
       border-radius: 11px;
-      background: #091012;
+      background: var(--soft);
       aspect-ratio: 16 / 9;
       object-fit: contain;
     }
@@ -232,51 +205,57 @@
 
     .button.secondary {
       color: var(--muted);
-      background: transparent;
-      border: 1px solid rgba(237, 242, 241, .16);
+      background: #fff;
+      border: 1px solid var(--line);
     }
 
-    .button.secondary:hover { color: var(--paper); background: rgba(237, 242, 241, .07); }
+    .button.secondary:hover { color: var(--ink); background: var(--soft); }
 
-    .library-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 18px;
-    }
+    .library-top { display: block; }
 
     .stats {
-      display: flex;
-      gap: 7px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 20px;
     }
 
     .stat {
-      min-width: 54px;
-      padding: 7px 9px;
-      border: 1px solid rgba(237, 242, 241, .12);
+      min-width: 0;
+      padding: 12px 9px;
+      border: 1px solid var(--line);
       border-radius: 10px;
       color: var(--muted);
+      background: var(--soft);
       font-size: 11px;
       text-align: center;
+      cursor: pointer;
+      transition: border-color .24s ease, background .24s ease, color .24s ease;
     }
 
     .stat strong {
       display: block;
       margin-bottom: 2px;
-      color: var(--paper);
+      color: var(--ink);
       font-size: 17px;
       font-weight: 500;
     }
 
-    .content-list { margin-top: 28px; }
+    .stat[aria-current="true"] {
+      border-color: #a7dfe6;
+      color: #176b78;
+      background: #e7f7f9;
+    }
+
+    .stat[aria-current="true"] strong { color: #176b78; }
+
+    .content-list { margin-top: 24px; }
 
     .list-head,
     .content-row {
       gap: 14px;
       padding: 0 0 12px;
-      border-bottom: 1px solid rgba(237, 242, 241, .1);
+      border-bottom: 1px solid #e5ebe8;
     }
 
     .list-head {
@@ -295,7 +274,7 @@
       flex: 0 0 auto;
       border-radius: 8px;
       object-fit: cover;
-      background: #091012;
+      background: var(--soft);
     }
 
     .content-main {
@@ -319,7 +298,7 @@
 
     .type-tag {
       min-width: 78px;
-      color: var(--cyan);
+      color: #237483;
       font-size: 12px;
       text-align: right;
     }
@@ -348,10 +327,10 @@
       z-index: 10;
       max-width: min(360px, calc(100vw - 40px));
       padding: 13px 16px;
-      border: 1px solid rgba(99, 216, 232, .32);
+      border: 1px solid #9fdbe4;
       border-radius: 12px;
-      color: var(--paper);
-      background: #122023;
+      color: #efffff;
+      background: #17454d;
       font-size: 13px;
       opacity: 0;
       pointer-events: none;
@@ -362,17 +341,13 @@
     .notice.is-visible { opacity: 1; transform: translateY(0); }
 
     @media (max-width: 860px) {
-      .headline { align-items: flex-end; }
       .workspace { display: grid; }
       .entry-panel { width: auto; }
     }
 
     @media (max-width: 600px) {
       .shell { width: min(100% - 24px, 1440px); padding-top: 18px; }
-      .headline { display: block; padding-top: 68px; }
-      .headline-copy { width: auto; margin-top: 20px; }
-      .library-top { display: block; }
-      .stats { justify-content: flex-start; margin-top: 20px; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .type-tag { display: none; }
       .content-thumb { width: 68px; height: 44px; }
     }
@@ -384,14 +359,6 @@
       <a class="brand" href="index.html">像素100&奇点同行 <span>· 内容后台</span></a>
       <a class="site-link" href="index.html">查看前台</a>
     </header>
-
-    <section class="headline">
-      <div>
-        <p class="eyebrow">CONTENT CONTROL ROOM</p>
-        <h1>让每一条成长，都有自己的播放位置。</h1>
-      </div>
-      <p class="headline-copy">录入后刷新前台即可播放。内容仅保存于当前浏览器；适合本地维护和现场展示。</p>
-    </section>
 
     <section class="workspace">
       <form class="entry-panel" id="content-form">
@@ -453,10 +420,7 @@
 
       <section class="library-panel">
         <div class="library-top">
-          <div>
-            <h2>内容库</h2>
-            <p class="panel-note">这里的内容会按类别自动加入前台频道。</p>
-          </div>
+          <h2>内容库</h2>
           <div class="stats" id="stats"></div>
         </div>
 
@@ -501,6 +465,7 @@
     const notice = document.querySelector('#notice');
     let uploadedSource = '';
     let noticeTimer;
+    let activeChannel = 'works';
 
     function readContent() {
       try {
@@ -538,28 +503,35 @@
     function renderStats(content) {
       stats.replaceChildren();
       Object.entries(channelNames).forEach(([key, name]) => {
-        const item = document.createElement('div');
+        const item = document.createElement('button');
         item.className = 'stat';
+        item.type = 'button';
+        item.setAttribute('aria-current', String(key === activeChannel));
         const count = content.filter(entry => entry.channel === key).length;
         item.innerHTML = `<strong>${count}</strong>${name}`;
+        item.addEventListener('click', () => {
+          activeChannel = key;
+          renderList();
+        });
         stats.append(item);
       });
     }
 
     function renderList() {
       const content = [...builtinContent, ...readContent()];
+      const channelContent = content.filter(entry => entry.channel === activeChannel);
       contentList.replaceChildren();
       renderStats(content);
 
-      if (!content.length) {
+      if (!channelContent.length) {
         const empty = document.createElement('div');
         empty.className = 'empty';
-        empty.textContent = '还没有后台录入内容。先添加一条，刷新前台即可播放。';
+        empty.textContent = `暂未录入「${channelNames[activeChannel]}」内容。`;
         contentList.append(empty);
         return;
       }
 
-      content
+      channelContent
         .slice()
         .reverse()
         .forEach(entry => {
@@ -683,6 +655,7 @@
       }
 
       form.reset();
+      activeChannel = channel;
       renderList();
       showNotice(`已加入「${channelNames[channel]}」，刷新前台即可播放。`);
     });
