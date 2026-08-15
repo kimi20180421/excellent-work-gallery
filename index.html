@@ -170,7 +170,12 @@
 
     .carousel[data-channel="offers"] .artwork img,
     .carousel[data-channel="offers"] .artwork video {
+      aspect-ratio: 9 / 16;
       background: transparent;
+    }
+
+    .carousel[data-channel="offers"] .artwork {
+      width: min(94vw, 640px, calc((100svh - 210px) * 9 / 16));
     }
 
     .carousel-guide {
@@ -304,6 +309,9 @@
       .slide { padding: 72px 12px 82px; }
       .artwork {
         width: min(calc(100vw - 24px), calc((100svh - 190px) * 16 / 9));
+      }
+      .carousel[data-channel="offers"] .artwork {
+        width: min(calc(100vw - 24px), calc((100svh - 190px) * 9 / 16));
       }
       .artwork img { border-radius: 16px; }
       .carousel-guide { width: calc(100vw - 36px); gap: 4px; bottom: 76px; }
