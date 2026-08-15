@@ -374,7 +374,7 @@
     <section class="workspace">
       <form class="entry-panel" id="content-form">
         <h2>录入内容</h2>
-        <p class="panel-note">Offer 捷报建议使用 9:16 竖版图片。图片与短视频均可上传，视频超过 3MB 请填写可公开访问的 MP4 地址。</p>
+        <p class="panel-note">Offer 捷报建议使用 9:16 竖版图片。图片与视频均可直接上传，也可填写公开媒体地址。</p>
 
         <div class="field-grid">
           <div class="field">
@@ -411,7 +411,7 @@
           </div>
 
           <div class="field" id="upload-field">
-            <label for="media-file" id="media-file-label">上传图片 <span class="optional">建议小于 2MB</span></label>
+            <label for="media-file" id="media-file-label">上传图片</label>
             <input id="media-file" type="file" accept="image/*">
           </div>
 
@@ -483,8 +483,6 @@
     let uploadedSource = '';
     let noticeTimer;
     let activeChannel = 'works';
-    const MAX_IMAGE_UPLOAD_BYTES = 2 * 1024 * 1024;
-    const MAX_VIDEO_UPLOAD_BYTES = 3 * 1024 * 1024;
 
     function readContent() {
       try {
@@ -613,8 +611,8 @@
       const isVideo = mediaType.value === 'video';
       fileInput.accept = isVideo ? 'video/*' : 'image/*';
       fileLabel.innerHTML = isVideo
-        ? '上传视频 <span class="optional">建议小于 3MB</span>'
-        : '上传图片 <span class="optional">建议小于 2MB</span>';
+        ? '上传视频'
+        : '上传图片';
     }
 
     mediaType.addEventListener('change', () => {
@@ -634,13 +632,6 @@
         fileInput.value = '';
         resetPreview();
         showNotice(`请选择${isVideo ? '视频' : '图片'}文件。`);
-        return;
-      }
-      const sizeLimit = isVideo ? MAX_VIDEO_UPLOAD_BYTES : MAX_IMAGE_UPLOAD_BYTES;
-      if (file.size > sizeLimit) {
-        fileInput.value = '';
-        resetPreview();
-        showNotice(`${isVideo ? '视频' : '图片'}超过 ${isVideo ? '3MB' : '2MB'}，请压缩后上传或填写外部地址。`);
         return;
       }
       const reader = new FileReader();
@@ -695,7 +686,7 @@
       try {
         saveContent(content);
       } catch {
-        showNotice('保存失败：本地存储空间不足。请使用外部图片地址或更小的图片。');
+        showNotice('保存失败：浏览器本地存储空间不足，请清理已有内容或改用公开媒体地址。');
         return;
       }
 
